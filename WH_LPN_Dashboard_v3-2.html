@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WH LPN — Manpower Dashboard 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.x/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --n9:#061325;--n8:#0D2347;--n7:#163570;--n6:#1E4D9E;--n5:#2A6CC8;--n4:#4D88D6;--n3:#85B3E8;--n2:#C0D8F5;--n1:#EBF3FC;
+  --t8:#063328;--t7:#0A5240;--t6:#0F7A5F;--t5:#14A37F;--t4:#2DC99F;--t3:#7ADDC4;--t2:#BDF0E3;--t1:#E8FAF5;
+  --r6:#7B1212;--r5:#C0392B;--r4:#E74C3C;--r2:#FADBD8;--r1:#FEF0EF;
+  --a6:#7A3B00;--a5:#B85C00;--a4:#E07B00;--a2:#FDEBD0;--a1:#FFF8F0;
+  --g9:#0A0A0B;--g8:#18181B;--g7:#27272A;--g6:#3F3F46;--g5:#52525B;--g4:#71717A;--g3:#A1A1AA;--g2:#D4D4D8;--g1:#F4F4F5;--g0:#FAFAFA;
+  --white:#FFFFFF;
+  --font:'Plus Jakarta Sans',sans-serif;
+  --display:'Syne',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --r4:4px;--r8:8px;--r12:12px;--r16:16px;--r20:20px;
+  --sh-sm:0 1px 3px rgba(0,0,0,.05),0 1px 2px rgba(0,0,0,.04);
+  --sh-md:0 4px 16px rgba(0,0,0,.07),0 2px 6px rgba(0,0,0,.04);
+  --sh-lg:0 12px 40px rgba(0,0,0,.1),0 4px 12px rgba(0,0,0,.05);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:13px}
+body{font-family:var(--font);background:var(--g0);color:var(--g9);-webkit-font-smoothing:antialiased}
+
+.shell{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+
+/* SIDEBAR */
+.sb{background:var(--n9);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:hidden;border-right:1px solid rgba(255,255,255,.04)}
+.sb-brand{padding:26px 20px 22px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sb-mark{width:40px;height:40px;border-radius:var(--r8);background:linear-gradient(135deg,var(--t6) 0%,var(--n6) 100%);display:flex;align-items:center;justify-content:center;margin-bottom:13px}
+.sb-mark i{font-size:20px;color:#fff}
+.sb-title{font-family:var(--display);font-size:15px;font-weight:700;color:#fff;letter-spacing:-.01em;line-height:1.3}
+.sb-ver{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.25);margin-top:4px;letter-spacing:.05em}
+.sb-nav{flex:1;padding:14px 10px;display:flex;flex-direction:column;gap:1px;overflow-y:auto}
+.sb-grp{font-family:var(--mono);font-size:9px;font-weight:500;color:rgba(255,255,255,.2);letter-spacing:.1em;text-transform:uppercase;padding:12px 10px 5px}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r8);cursor:pointer;color:rgba(255,255,255,.42);font-size:12.5px;font-weight:400;transition:all .12s;position:relative}
+.sb-item:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.78)}
+.sb-item.on{background:rgba(255,255,255,.07);color:#fff;font-weight:500}
+.sb-item.on::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:18px;background:var(--t4);border-radius:0 3px 3px 0}
+.sb-item i{font-size:15px;flex-shrink:0}
+.sb-item.on i{opacity:1}
+.sb-n{margin-left:auto;font-family:var(--mono);font-size:9px;font-weight:500;padding:2px 6px;border-radius:999px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.38)}
+.sb-item.on .sb-n{background:rgba(45,201,159,.18);color:var(--t4)}
+.sb-n.alert{background:rgba(224,123,0,.2);color:#E07B00}
+.sb-foot{padding:14px 16px;border-top:1px solid rgba(255,255,255,.06);font-family:var(--mono);font-size:9.5px;color:rgba(255,255,255,.18);line-height:1.9}
+.sb-foot em{color:var(--t4);font-style:normal}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;overflow:hidden;min-height:100vh}
+
+/* TOPBAR */
+.topbar{background:var(--white);border-bottom:1px solid var(--g2);padding:0 30px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20}
+.tb-l{display:flex;align-items:center;gap:14px}
+.tb-bc{font-family:var(--mono);font-size:10px;color:var(--g3);letter-spacing:.02em}
+.tb-bc span{color:var(--g3)}
+.tb-ttl{font-family:var(--display);font-size:16px;font-weight:700;color:var(--g9);letter-spacing:-.02em}
+.tb-live{font-family:var(--mono);font-size:9.5px;font-weight:500;background:var(--t1);color:var(--t6);padding:3px 9px;border-radius:999px;border:1px solid var(--t2)}
+.tb-r{display:flex;align-items:center;gap:7px}
+.tb-tag{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--g4);background:var(--g1);padding:5px 10px;border-radius:var(--r8)}
+.tb-tag i{font-size:13px;color:var(--g3)}
+.tb-btn{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;font-family:var(--display);background:var(--n8);color:#fff;border:none;border-radius:var(--r8);padding:7px 15px;cursor:pointer;letter-spacing:-.01em;transition:background .12s,transform .1s}
+.tb-btn:hover{background:var(--n7);transform:translateY(-1px)}
+.tb-btn i{font-size:14px}
+
+/* CONTENT */
+.content{padding:26px 30px 48px;flex:1}
+.panel{display:none}
+.panel.on{display:block;animation:rise .22s cubic-bezier(.22,1,.36,1)}
+@keyframes rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+
+/* SECTION HEADER */
+.sh{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.sh-lbl{font-family:var(--mono);font-size:9px;font-weight:500;color:var(--g3);letter-spacing:.08em;text-transform:uppercase}
+.sh-ttl{font-family:var(--display);font-size:14px;font-weight:700;color:var(--g9);letter-spacing:-.02em}
+.sh-rule{flex:1;height:1px;background:var(--g2);margin-left:4px}
+
+/* KPI CARDS */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.kpi{background:var(--white);border:1px solid var(--g2);border-radius:var(--r16);padding:20px 22px;position:relative;overflow:hidden;box-shadow:var(--sh-sm);transition:box-shadow .15s,transform .15s;cursor:default}
+.kpi:hover{box-shadow:var(--sh-md);transform:translateY(-2px)}
+.kpi-stripe{position:absolute;top:0;left:0;right:0;height:2.5px}
+.kpi-ico{width:36px;height:36px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;margin-bottom:13px}
+.kpi-ico i{font-size:18px}
+.kpi-lbl{font-size:10px;font-weight:600;color:var(--g4);letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+.kpi-val{font-family:var(--display);font-size:30px;font-weight:800;color:var(--g9);line-height:1;letter-spacing:-.03em}
+.kpi-val sub{font-size:13px;font-weight:500;color:var(--g4);margin-left:4px;vertical-align:baseline;font-family:var(--font)}
+.kpi-sub{font-size:10.5px;color:var(--g4);margin-top:7px;display:flex;align-items:center;gap:4px}
+.kpi-sub i{font-size:12px;color:var(--g3)}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+.g64{display:grid;grid-template-columns:1.65fr 1fr;gap:16px;margin-bottom:18px}
+.g46{display:grid;grid-template-columns:1fr 1.5fr;gap:16px;margin-bottom:18px}
+
+/* CARD */
+.card{background:var(--white);border:1px solid var(--g2);border-radius:var(--r16);padding:22px 24px;box-shadow:var(--sh-sm)}
+.chd{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:13px;border-bottom:1px solid var(--g1)}
+.cico{width:28px;height:28px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cico i{font-size:14px}
+.cttl{font-family:var(--display);font-size:13px;font-weight:700;color:var(--g9);letter-spacing:-.01em}
+.cmeta{font-size:10.5px;color:var(--g4);margin-left:auto;font-family:var(--mono)}
+
+/* DEPT BARS */
+.dr{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.di{width:24px;height:24px;border-radius:var(--r4);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.di i{font-size:12px}
+.dn{font-size:12px;font-weight:500;color:var(--g8);width:106px;flex-shrink:0}
+.dt{flex:1;height:8px;background:var(--g1);border-radius:4px;overflow:hidden}
+.df{height:100%;border-radius:4px}
+.dc{font-family:var(--mono);font-size:10.5px;color:var(--g5);width:20px;text-align:right}
+.dp{font-family:var(--mono);font-size:9.5px;color:var(--g3);width:36px;text-align:right}
+
+/* PYRAMID */
+.pr{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+.ltag{width:34px;height:19px;border-radius:var(--r4);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9.5px;font-weight:700;flex-shrink:0}
+.pn{font-size:11px;color:var(--g5);width:118px;flex-shrink:0}
+.pt{flex:1;height:7px;background:var(--g1);border-radius:3px;overflow:hidden}
+.pf{height:100%;border-radius:3px}
+.pc{font-family:var(--mono);font-size:10px;color:var(--g4);width:18px;text-align:right}
+
+/* WORKLOAD TABLE */
+.wtbl{width:100%;border-collapse:collapse}
+.wtbl th{text-align:left;padding:8px 12px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--g4);background:var(--g0);border-bottom:1px solid var(--g2)}
+.wtbl td{padding:11px 12px;border-bottom:1px solid var(--g1);vertical-align:middle}
+.wtbl tr:last-child td{border-bottom:none}
+.wtbl tbody tr{cursor:pointer;transition:background .1s}
+.wtbl tbody tr:hover td{background:var(--g0)}
+.pc2{display:flex;align-items:center;gap:10px}
+.av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:11px;font-weight:700;flex-shrink:0}
+.pn2{font-size:12.5px;font-weight:600;color:var(--g9)}
+.pd{font-size:10.5px;color:var(--g4);margin-top:1px}
+.hrow{display:flex;align-items:center;gap:8px}
+.htrk{flex:1;height:8px;background:var(--g1);border-radius:4px;overflow:hidden;position:relative}
+.hfill{height:100%;border-radius:4px}
+.hmrk{position:absolute;top:-1px;bottom:-1px;width:2px;background:var(--a4);border-radius:1px;left:69.2%}
+.hval{font-family:var(--mono);font-size:11px;font-weight:500;width:32px}
+
+/* CHIPS */
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap;letter-spacing:.01em}
+.chip i{font-size:11px}
+.ok{background:var(--t1);color:var(--t6)}
+.ov{background:var(--r1);color:var(--r5)}
+.lo{background:var(--n1);color:var(--n6)}
+.wn{background:var(--a1);color:var(--a5)}
+.na{background:var(--g1);color:var(--g4)}
+
+/* ACT BARS */
+.ar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.adot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.an{font-size:11.5px;color:var(--g7);flex:1}
+.atrk{width:100px;height:7px;background:var(--g1);border-radius:3px;overflow:hidden}
+.afill{height:100%;border-radius:3px}
+.ah{font-family:var(--mono);font-size:10.5px;color:var(--g4);width:32px;text-align:right}
+
+/* LEGEND */
+.leg{display:flex;flex-wrap:wrap;gap:11px;margin-bottom:12px}
+.li{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--g5)}
+.lsq{width:9px;height:9px;border-radius:2px}
+
+/* GAP */
+.gg{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.gc{border:1px solid var(--g2);border-radius:var(--r12);padding:16px 12px;text-align:center;background:var(--white);transition:box-shadow .15s}
+.gc:hover{box-shadow:var(--sh-md)}
+.gn{font-family:var(--display);font-size:13px;font-weight:700;color:var(--g9);margin-bottom:4px}
+.grw{width:58px;height:58px;margin:10px auto;position:relative;display:flex;align-items:center;justify-content:center}
+.grw svg{position:absolute;top:0;left:0;transform:rotate(-90deg)}
+.grv{font-family:var(--mono);font-size:14px;font-weight:700;z-index:1}
+.gsb{font-size:10.5px;color:var(--g4);margin-top:4px}
+.gtag{display:inline-block;font-size:9px;font-weight:600;padding:2px 8px;border-radius:999px;margin-top:6px;letter-spacing:.02em}
+
+/* PROGRESS */
+.pi{margin-bottom:16px}
+.ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.phn{font-size:12.5px;font-weight:500;color:var(--g8);display:flex;align-items:center;gap:6px}
+.phn i{font-size:13px}
+.php{font-family:var(--mono);font-size:11px;font-weight:600}
+.ptrk{height:9px;background:var(--g1);border-radius:5px;overflow:hidden}
+.pfill{height:100%;border-radius:5px}
+
+/* ALERTS */
+.alert{display:flex;align-items:flex-start;gap:12px;border-radius:var(--r12);padding:13px 15px;margin-bottom:16px;border-left:3px solid}
+.alert.am{background:var(--a1);border-color:var(--a4)}
+.alert.rd{background:var(--r1);border-color:var(--r4)}
+.ai{font-size:17px;flex-shrink:0;margin-top:1px}
+.alert.am .ai{color:var(--a5)}
+.alert.rd .ai{color:var(--r5)}
+.at{font-size:12px;font-weight:700;margin-bottom:3px}
+.alert.am .at{color:var(--a6)}
+.alert.rd .at{color:var(--r6)}
+.ad{font-size:11px;color:var(--g5);line-height:1.6}
+
+/* SUIT CARD */
+.sc{border:1px solid var(--g2);border-radius:var(--r16);padding:20px 22px;background:var(--white);box-shadow:var(--sh-sm)}
+.sci{width:36px;height:36px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.sci i{font-size:18px}
+.scn{font-family:var(--display);font-size:28px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.scl{font-size:11px;color:var(--g4);margin-top:4px}
+.scm{font-size:11px;margin-top:8px;line-height:1.6}
+
+/* WORKLOAD ALERTS */
+.wa{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:1px solid;border-radius:var(--r12);margin-bottom:10px}
+.wa:last-child{margin-bottom:0}
+.wa.rd{background:var(--r1);border-color:#F5C0B8}
+.wa.am{background:var(--a1);border-color:#F9D3A0}
+.wa.bl{background:var(--n1);border-color:var(--n2)}
+.wai{font-size:20px;flex-shrink:0;margin-top:1px}
+.wa.rd .wai{color:var(--r5)}
+.wa.am .wai{color:var(--a4)}
+.wa.bl .wai{color:var(--n5)}
+.wname{font-size:12.5px;font-weight:700;color:var(--g9)}
+.wdesc{font-size:11px;color:var(--g5);margin-top:3px;line-height:1.55}
+.new-tag{font-family:var(--mono);font-size:8.5px;font-weight:500;background:var(--t1);color:var(--t6);padding:1px 7px;border-radius:999px;margin-left:6px}
+
+/* DRAWER */
+.ov{display:none;position:fixed;inset:0;background:rgba(6,19,37,.5);backdrop-filter:blur(3px);z-index:100;align-items:flex-start;justify-content:flex-end}
+.ov.open{display:flex}
+.drw{width:480px;background:var(--white);height:100vh;overflow-y:auto;box-shadow:var(--sh-lg);animation:sli .2s cubic-bezier(.22,1,.36,1)}
+@keyframes sli{from{transform:translateX(100%)}to{transform:none}}
+.dh{background:var(--n9);color:#fff;padding:22px 24px;position:sticky;top:0;z-index:1;display:flex;align-items:flex-start;gap:14px}
+.dav{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:13px;font-weight:700;flex-shrink:0}
+.dname{font-family:var(--display);font-size:16px;font-weight:700;letter-spacing:-.02em}
+.dmeta{font-size:11px;color:rgba(255,255,255,.45);margin-top:3px}
+.dcls{margin-left:auto;background:rgba(255,255,255,.08);border:none;cursor:pointer;color:rgba(255,255,255,.5);font-size:16px;width:30px;height:30px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;transition:all .12s}
+.dcls:hover{background:rgba(255,255,255,.16);color:#fff}
+.db{padding:22px 24px}
+.dkpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.dk{background:var(--g0);border:1px solid var(--g1);border-radius:var(--r8);padding:10px;text-align:center}
+.dkv{font-family:var(--display);font-size:18px;font-weight:700;letter-spacing:-.02em}
+.dkl{font-size:9.5px;color:var(--g4);margin-top:2px;font-family:var(--mono)}
+.sbox{border-radius:var(--r12);padding:12px 14px;margin-bottom:18px;border-left:3px solid}
+.sbox.ok{background:var(--t1);border-color:var(--t5)}
+.sbox.ov{background:var(--r1);border-color:var(--r4)}
+.sbox.lo{background:var(--n1);border-color:var(--n5)}
+.sbox.wn{background:var(--a1);border-color:var(--a4)}
+.sbox.na{background:var(--g0);border-color:var(--g2)}
+.sbt{font-size:12px;font-weight:700;margin-bottom:3px}
+.sbd{font-size:11px;color:var(--g5);line-height:1.6}
+.tsec{font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--g4);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.tsec i{font-size:14px}
+.titem{display:flex;gap:10px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--g1)}
+.titem:last-child{border-bottom:none;margin-bottom:0}
+.fp{font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:999px;white-space:nowrap;flex-shrink:0;margin-top:1px;letter-spacing:.01em}
+.fd{background:var(--n1);color:var(--n6)}
+.fw{background:var(--a1);color:var(--a5)}
+.fm{background:var(--t1);color:var(--t6)}
+.f15{background:#F0EBFF;color:#6B3FA0}
+.tb2{flex:1}
+.ta{font-size:11px;font-weight:600;color:var(--g8);margin-bottom:2px;display:flex;align-items:center;gap:5px}
+.tadot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.tdet{font-size:11px;color:var(--g5);line-height:1.5}
+.tgap{font-size:10px;color:var(--a5);background:var(--a1);padding:2px 7px;border-radius:var(--r4);display:inline-block;margin-top:4px;border:1px solid var(--a2)}
+.th{font-family:var(--mono);font-size:11.5px;font-weight:500;color:var(--g7);flex-shrink:0;padding-top:1px}
+
+@media print{.sb,.topbar{display:none}.shell{display:block}.panel{display:block!important;page-break-after:always}}
+
+.org-ft{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:6px 13px;border-radius:var(--r8);
+  border:1px solid var(--g2);font-size:12px;font-weight:500;
+  cursor:pointer;background:var(--white);color:var(--g6);
+  font-family:var(--font);transition:all .12s;
+}
+.org-ft:hover{background:var(--g1);border-color:var(--g3)}
+.org-ft.active{background:var(--n8);color:#fff;border-color:var(--n8)}
+.org-ft span{font-family:var(--mono);font-size:10px;opacity:.7}
+.org-ft.active span{opacity:.8}
+
+</style>
+</head>
+<body>
+<div class="shell">
+
+<aside class="sb">
+  <div class="sb-brand">
+    <div class="sb-mark"><i class="ti ti-building-warehouse"></i></div>
+    <div class="sb-title">WH LPN<br>Manpower</div>
+    <div class="sb-ver">DASHBOARD 2026 · v3</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-grp">ภาพรวม</div>
+    <div class="sb-item on" onclick="nav(this,'overview')"><i class="ti ti-layout-dashboard"></i>ภาพรวมกำลังคน<span class="sb-n">89</span></div>
+    <div class="sb-item" onclick="nav(this,'workload')"><i class="ti ti-activity"></i>ภาระงานรายบุคคล</div>
+    <div class="sb-grp">วิเคราะห์</div>
+    <div class="sb-item" onclick="nav(this,'suit')"><i class="ti ti-scale"></i>ความเหมาะสม Level</div>
+    <div class="sb-item" onclick="nav(this,'gap')"><i class="ti ti-alert-triangle"></i>Gap Analysis<span class="sb-n alert">3</span></div>
+    <div class="sb-grp">ข้อมูล</div>
+    <div class="sb-item" onclick="nav(this,'jd')"><i class="ti ti-file-description"></i>สถานะ JD<span class="sb-n">18.5%</span></div>
+    <div class="sb-item" onclick="nav(this,'org')"><i class="ti ti-network"></i>Organiz Chart</div>
+  </nav>
+  <div class="sb-foot">อัปเดต <em>24 Mar 2026</em><br>OUTBOUND SO ยังไม่ได้กรอก</div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="tb-l">
+      <div class="tb-bc">WH LPN <span>/</span> <span id="tbc">ภาพรวมกำลังคน</span></div>
+      <div class="tb-ttl" id="tbt">ภาพรวมกำลังคน</div>
+      <span class="tb-live">Live</span>
+    </div>
+    <div class="tb-r">
+      <div class="tb-tag"><i class="ti ti-map-pin"></i>ลำพูน</div>
+      <div class="tb-tag"><i class="ti ti-users"></i>89 คน</div>
+      <button class="tb-btn" onclick="window.print()"><i class="ti ti-printer"></i>พิมพ์ / Export</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+  <!-- OVERVIEW -->
+  <div id="p-overview" class="panel on">
+    <div class="kpis">
+      <div class="kpi">
+        <div class="kpi-stripe" style="background:linear-gradient(90deg,var(--n6),var(--t5))"></div>
+        <div class="kpi-ico" style="background:var(--n1)"><i class="ti ti-users" style="color:var(--n6)"></i></div>
+        <div class="kpi-lbl">กำลังคนทั้งหมด</div>
+        <div class="kpi-val">89<sub>คน</sub></div>
+        <div class="kpi-sub"><i class="ti ti-building-warehouse"></i>คลังสินค้าลำพูน</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-stripe" style="background:linear-gradient(90deg,var(--t5),var(--t4))"></div>
+        <div class="kpi-ico" style="background:var(--t1)"><i class="ti ti-sitemap" style="color:var(--t6)"></i></div>
+        <div class="kpi-lbl">หน่วยงาน</div>
+        <div class="kpi-val">5<sub>แผนก</sub></div>
+        <div class="kpi-sub"><i class="ti ti-check"></i>Inbound · OB-SO · OB-STO · Maint · Admin</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-stripe" style="background:linear-gradient(90deg,var(--r4),var(--a4))"></div>
+        <div class="kpi-ico" style="background:var(--r1)"><i class="ti ti-flame" style="color:var(--r5)"></i></div>
+        <div class="kpi-lbl">Overload (OT)</div>
+        <div class="kpi-val">1<sub>คน</sub></div>
+        <div class="kpi-sub"><i class="ti ti-alert-circle"></i>สุรศักดิ์ +3h/วัน</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-stripe" style="background:linear-gradient(90deg,var(--a4),#F0C070)"></div>
+        <div class="kpi-ico" style="background:var(--a1)"><i class="ti ti-file-check" style="color:var(--a5)"></i></div>
+        <div class="kpi-lbl">JD กรอกแล้ว</div>
+        <div class="kpi-val">9<sub>คน</sub></div>
+        <div class="kpi-sub"><i class="ti ti-clock"></i>OB-SO ยังว่าง 23 คน</div>
+      </div>
+    </div>
+    <div class="g64">
+      <div class="card">
+        <div class="chd"><div class="cico" style="background:var(--n1)"><i class="ti ti-chart-bar" style="color:var(--n6)"></i></div><div class="cttl">สัดส่วนพนักงานตามหน่วยงาน</div><div class="cmeta">รวม 89 คน</div></div>
+        <div class="dr"><div class="di" style="background:var(--n1)"><i class="ti ti-arrow-down-circle" style="color:var(--n6)"></i></div><div class="dn">INBOUND</div><div class="dt"><div class="df" style="width:32.6%;background:var(--n7)"></div></div><div class="dc">29</div><div class="dp">32.6%</div></div>
+        <div class="dr"><div class="di" style="background:var(--n1)"><i class="ti ti-package" style="color:var(--n5)"></i></div><div class="dn">OUTBOUND-STO</div><div class="dt"><div class="df" style="width:32.6%;background:var(--n5)"></div></div><div class="dc">29</div><div class="dp">32.6%</div></div>
+        <div class="dr"><div class="di" style="background:var(--n1)"><i class="ti ti-truck-delivery" style="color:var(--n4)"></i></div><div class="dn">OUTBOUND-SO</div><div class="dt"><div class="df" style="width:25.8%;background:var(--n4)"></div></div><div class="dc">23</div><div class="dp">25.8%</div></div>
+        <div class="dr"><div class="di" style="background:var(--t1)"><i class="ti ti-tool" style="color:var(--t6)"></i></div><div class="dn">Maintenance</div><div class="dt"><div class="df" style="width:5.6%;background:var(--t6)"></div></div><div class="dc">5</div><div class="dp">5.6%</div></div>
+        <div class="dr"><div class="di" style="background:var(--t1)"><i class="ti ti-shield-check" style="color:var(--t5)"></i></div><div class="dn">Safety / HR</div><div class="dt"><div class="df" style="width:2.2%;background:var(--t5)"></div></div><div class="dc">2</div><div class="dp">2.2%</div></div>
+      </div>
+      <div class="card">
+        <div class="chd"><div class="cico" style="background:var(--t1)"><i class="ti ti-chart-donut-3" style="color:var(--t6)"></i></div><div class="cttl">ตามตำแหน่ง</div></div>
+        <div style="position:relative;height:165px"><canvas id="posChart" role="img" aria-label="headcount by position">headcount by position</canvas></div>
+        <div class="leg" style="margin-top:10px;margin-bottom:0">
+          <div class="li"><div class="lsq" style="background:var(--n7)"></div>พนักงาน 31</div>
+          <div class="li"><div class="lsq" style="background:var(--n5)"></div>พนักงานรายวัน 28</div>
+          <div class="li"><div class="lsq" style="background:var(--n3)"></div>เจ้าหน้าที่ 18</div>
+          <div class="li"><div class="lsq" style="background:var(--t6)"></div>จนท.อาวุโส 6</div>
+          <div class="li"><div class="lsq" style="background:var(--t4)"></div>หัวหน้า+ 6</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="chd"><div class="cico" style="background:var(--n1)"><i class="ti ti-medal" style="color:var(--n6)"></i></div><div class="cttl">โครงสร้าง Level</div><div class="cmeta">Span of Control 1:13.8 · ผู้บริหาร 6 · พนักงาน 59</div></div>
+      <div class="pr"><div class="ltag" style="background:var(--n9);color:#fff">L9</div><div class="pn">ผู้จัดการแผนก</div><div class="pt"><div class="pf" style="width:3.2%;background:var(--n9)"></div></div><div class="pc">1</div></div>
+      <div class="pr"><div class="ltag" style="background:var(--n8);color:#fff">L8</div><div class="pn">หัวหน้าหน่วยงาน</div><div class="pt"><div class="pf" style="width:9.7%;background:var(--n8)"></div></div><div class="pc">3</div></div>
+      <div class="pr"><div class="ltag" style="background:var(--n7);color:#fff">L7</div><div class="pn">ผู้ช่วยหัวหน้า</div><div class="pt"><div class="pf" style="width:6.5%;background:var(--n7)"></div></div><div class="pc">2</div></div>
+      <div class="pr"><div class="ltag" style="background:var(--t6);color:#fff">L6</div><div class="pn">เจ้าหน้าที่อาวุโส</div><div class="pt"><div class="pf" style="width:19.4%;background:var(--t6)"></div></div><div class="pc">6</div></div>
+      <div class="pr"><div class="ltag" style="background:var(--t5);color:#fff">L5</div><div class="pn">เจ้าหน้าที่</div><div class="pt"><div class="pf" style="width:58.1%;background:var(--t5)"></div></div><div class="pc">18</div></div>
+      <div class="pr"><div class="ltag" style="background:var(--n2);color:var(--n8)">L4</div><div class="pn">พนักงาน</div><div class="pt"><div class="pf" style="width:100%;background:var(--n2)"></div></div><div class="pc">31</div></div>
+      <div class="pr"><div class="ltag" style="background:var(--g1);color:var(--g5)">L3</div><div class="pn">พนักงานรายวัน</div><div class="pt"><div class="pf" style="width:90.3%;background:var(--g2)"></div></div><div class="pc">28</div></div>
+    </div>
+  </div>
+
+  <!-- WORKLOAD -->
+  <div id="p-workload" class="panel">
+    <div class="alert am"><i class="ti ti-info-circle ai"></i><div><div class="at">ข้อมูลที่แสดงเป็นส่วนที่กรอกแล้ว</div><div class="ad">Maintenance ครบ 5 คน · Inbound 1/24 · OB-STO 2/5 · OB-SO 0/23 · Safety/Admin 2/2 · <strong>เส้นสีส้ม = มาตรฐาน 9h/วัน (รวมพัก 1h)</strong></div></div></div>
+    <div class="g46" style="margin-bottom:18px">
+      <div class="card">
+        <div class="chd"><div class="cico" style="background:var(--n1)"><i class="ti ti-chart-bar" style="color:var(--n6)"></i></div><div class="cttl">ชั่วโมงงาน/วัน vs 9h มาตรฐาน</div></div>
+        <div style="position:relative;height:280px"><canvas id="hoursChart" role="img" aria-label="daily hours per person">daily hours</canvas></div>
+      </div>
+      <div class="card">
+        <div class="chd"><div class="cico" style="background:var(--t1)"><i class="ti ti-chart-pie-2" style="color:var(--t6)"></i></div><div class="cttl">ประเภทกิจกรรม (ชม.รวม)</div></div>
+        <div style="position:relative;height:165px"><canvas id="actChart" role="img" aria-label="activity type hours">activity</canvas></div>
+        <div style="margin-top:12px">
+          <div class="ar"><div class="adot" style="background:#533AB7"></div><div class="an">ตรวจ/ซ่อมบำรุง</div><div class="atrk"><div class="afill" style="width:97%;background:#533AB7"></div></div><div class="ah">49.5h</div></div>
+          <div class="ar"><div class="adot" style="background:var(--n7)"></div><div class="an">Floor Operation</div><div class="atrk"><div class="afill" style="width:74%;background:var(--n7)"></div></div><div class="ah">36.5h</div></div>
+          <div class="ar"><div class="adot" style="background:var(--n5)"></div><div class="an">Admin & Report</div><div class="atrk"><div class="afill" style="width:17%;background:var(--n5)"></div></div><div class="ah">8.5h</div></div>
+          <div class="ar"><div class="adot" style="background:var(--a4)"></div><div class="an">Meeting / Brief</div><div class="atrk"><div class="afill" style="width:11%;background:var(--a4)"></div></div><div class="ah">5.5h</div></div>
+          <div class="ar"><div class="adot" style="background:var(--n3)"></div><div class="an">Coordination</div><div class="atrk"><div class="afill" style="width:2%;background:var(--n3)"></div></div><div class="ah">1h</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="chd"><div class="cico" style="background:var(--n1)"><i class="ti ti-table" style="color:var(--n6)"></i></div><div class="cttl">รายละเอียดภาระงานแต่ละคน</div><div class="cmeta">คลิกแถวเพื่อดูงานทั้งหมด</div></div>
+      <table class="wtbl"><thead><tr>
+        <th>ชื่อ — ตำแหน่ง</th><th>Level</th>
+        <th style="width:200px">ชม./วัน vs 9h</th>
+        <th>งานหลัก</th><th>สถานะ</th>
+      </tr></thead><tbody id="wtbody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- SUITABILITY -->
+  <div id="p-suit" class="panel">
+    <div class="card" style="margin-bottom:18px">
+      <div class="chd"><div class="cico" style="background:var(--n1)"><i class="ti ti-chart-bar-popular" style="color:var(--n6)"></i></div><div class="cttl">Activity Mix % ตามตำแหน่ง</div><div class="cmeta">เกณฑ์ 7–9h/วัน = เหมาะสม</div></div>
+      <div style="position:relative;height:265px"><canvas id="suitChart" role="img" aria-label="activity mix stacked">activity mix</canvas></div>
+    </div>
+    <div class="g3">
+      <div class="sc" style="border-top:3px solid var(--t5)">
+        <div class="sci" style="background:var(--t1)"><i class="ti ti-circle-check" style="color:var(--t6)"></i></div>
+        <div class="scn" style="color:var(--t6)">6</div>
+        <div class="scl">เหมาะสม · ชม.งาน 7–9h</div>
+        <div class="scm" style="color:var(--g5)">นรินทร์ · ภาคิณ · <strong style="color:var(--t6)">นิธิกร ✓</strong> · อนุชา · ชลรบ · จักรพันธ์</div>
+      </div>
+      <div class="sc" style="border-top:3px solid var(--r4)">
+        <div class="sci" style="background:var(--r1)"><i class="ti ti-flame" style="color:var(--r5)"></i></div>
+        <div class="scn" style="color:var(--r5)">1</div>
+        <div class="scl">Overload · เกิน 9h/วัน</div>
+        <div class="scm" style="color:var(--r5);font-weight:600">สุรศักดิ์ — 12h (+3h OT/วัน)</div>
+      </div>
+      <div class="sc" style="border-top:3px solid var(--a4)">
+        <div class="sci" style="background:var(--a1)"><i class="ti ti-zoom-question" style="color:var(--a5)"></i></div>
+        <div class="scn" style="color:var(--a5)">2</div>
+        <div class="scl">ตรวจสอบ / ข้อมูลผิดปกติ</div>
+        <div class="scm" style="color:var(--a5);font-weight:600">นิมิต (On Call 24h) · ธนเดช (2h)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAP -->
+  <div id="p-gap" class="panel">
+    <div class="alert rd"><i class="ti ti-alert-triangle ai"></i><div><div class="at">พบ Gap สำคัญ 3 รายการ</div><div class="ad">ข้อมูลที่ขาดส่งผลให้ไม่สามารถวิเคราะห์ภาระงานรวมได้ครบ · OUTBOUND SO (23 คน) กระทบมากที่สุด</div></div></div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="chd"><div class="cico" style="background:var(--a1)"><i class="ti ti-clipboard-list" style="color:var(--a5)"></i></div><div class="cttl">สถานะการกรอก Job Description</div></div>
+      <div class="gg">
+        <div class="gc" style="border-top:3px solid var(--t5)"><div class="gn">Maintenance</div><div class="grw"><svg width="58" height="58" viewBox="0 0 58 58"><circle cx="29" cy="29" r="23" fill="none" stroke="var(--t1)" stroke-width="6"/><circle cx="29" cy="29" r="23" fill="none" stroke="var(--t5)" stroke-width="6" stroke-dasharray="144.5" stroke-dashoffset="0" stroke-linecap="round"/></svg><div class="grv" style="color:var(--t6)">100%</div></div><div class="gtag" style="background:var(--t1);color:var(--t6)">ครบ</div><div class="gsb">5 / 5 คน</div></div>
+        <div class="gc" style="border-top:3px solid var(--a4)"><div class="gn">Inbound</div><div class="grw"><svg width="58" height="58" viewBox="0 0 58 58"><circle cx="29" cy="29" r="23" fill="none" stroke="var(--a1)" stroke-width="6"/><circle cx="29" cy="29" r="23" fill="none" stroke="var(--a4)" stroke-width="6" stroke-dasharray="144.5" stroke-dashoffset="138.7" stroke-linecap="round"/></svg><div class="grv" style="color:var(--a5)">4%</div></div><div class="gtag" style="background:var(--a1);color:var(--a5)">บางส่วน</div><div class="gsb">1 / 24 คน</div></div>
+        <div class="gc" style="border-top:3px solid var(--a4)"><div class="gn">OB-STO</div><div class="grw"><svg width="58" height="58" viewBox="0 0 58 58"><circle cx="29" cy="29" r="23" fill="none" stroke="var(--a1)" stroke-width="6"/><circle cx="29" cy="29" r="23" fill="none" stroke="var(--a4)" stroke-width="6" stroke-dasharray="144.5" stroke-dashoffset="86.7" stroke-linecap="round"/></svg><div class="grv" style="color:var(--a5)">40%</div></div><div class="gtag" style="background:var(--a1);color:var(--a5)">บางส่วน</div><div class="gsb">2 / 5 คน</div></div>
+        <div class="gc" style="border-top:3px solid var(--r4)"><div class="gn">OB-SO</div><div class="grw"><svg width="58" height="58" viewBox="0 0 58 58"><circle cx="29" cy="29" r="23" fill="none" stroke="var(--r1)" stroke-width="6"/><circle cx="29" cy="29" r="23" fill="none" stroke="var(--r4)" stroke-width="6" stroke-dasharray="144.5" stroke-dashoffset="144.5" stroke-linecap="round"/></svg><div class="grv" style="color:var(--r5)">0%</div></div><div class="gtag" style="background:var(--r1);color:var(--r5)">ยังไม่กรอก</div><div class="gsb">0 / 23 คน</div></div>
+        <div class="gc" style="border-top:3px solid var(--t5)"><div class="gn">Safety/Admin</div><div class="grw"><svg width="58" height="58" viewBox="0 0 58 58"><circle cx="29" cy="29" r="23" fill="none" stroke="var(--t1)" stroke-width="6"/><circle cx="29" cy="29" r="23" fill="none" stroke="var(--t5)" stroke-width="6" stroke-dasharray="144.5" stroke-dashoffset="0" stroke-linecap="round"/></svg><div class="grv" style="color:var(--t6)">100%</div></div><div class="gtag" style="background:var(--t1);color:var(--t6)">ครบ</div><div class="gsb">2 / 2 คน</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="chd"><div class="cico" style="background:var(--r1)"><i class="ti ti-alert-circle" style="color:var(--r5)"></i></div><div class="cttl">Workload Alerts</div><div class="cmeta">พนักงานที่ต้องติดตาม</div></div>
+      <div class="wa rd"><i class="ti ti-flame wai"></i><div style="flex:1"><div class="wname">นายสุรศักดิ์ ต๊ะมา — Maintenance L5</div><div class="wdesc">บันทึกชั่วโมงงาน 12h/วัน เกินมาตรฐาน 3h · มี OT เพิ่ม 2h · ควรทบทวนการจัดกะหรือแบ่งงาน</div></div><span class="chip ov"><i class="ti ti-clock"></i>+3h OT</span></div>
+      <div class="wa am"><i class="ti ti-alert-triangle wai"></i><div style="flex:1"><div class="wname">นิมิต ผัดเจริญ — Outbound STO L8</div><div class="wdesc">บันทึก "On Call 24h" รวมเป็นชม.งาน — ควรแยก "ความรับผิดชอบ" ออกจาก "ชม.ทำงานจริง" (ประมาณ 7.5h/วัน)</div></div><span class="chip wn"><i class="ti ti-edit"></i>ตรวจสอบ</span></div>
+      <div class="wa bl"><i class="ti ti-hourglass-low wai"></i><div style="flex:1"><div class="wname">ธนเดช เทพศิริ — OB-STO L6 <span class="new-tag">อัปเดตใหม่</span></div><div class="wdesc">กรอกข้อมูลแล้ว 2h/วัน — ยังต่ำกว่ามาตรฐาน อาจกรอกไม่ครบหรืองานบางส่วนยังไม่ได้ระบุ</div></div><span class="chip lo"><i class="ti ti-arrow-down"></i>Underload</span></div>
+    </div>
+  </div>
+
+
+  <!-- ORG CHART -->
+  <div id="p-org" class="panel">
+    <div class="kpis" style="grid-template-columns:repeat(3,1fr);margin-bottom:22px">
+      <div class="kpi" style="grid-column:1/-1;display:flex;align-items:center;gap:16px;padding:18px 24px">
+        <div class="kpi-stripe" style="background:linear-gradient(90deg,var(--n8),var(--t5))"></div>
+        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--n7),var(--t6));display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i class="ti ti-user-star" style="font-size:24px;color:#fff"></i>
+        </div>
+        <div>
+          <div style="font-family:var(--mono);font-size:9px;font-weight:500;color:var(--g4);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px">ผู้รับผิดชอบ</div>
+          <div style="font-family:var(--display);font-size:18px;font-weight:800;color:var(--g9);letter-spacing:-.02em">วุฒินันท์ โนเขื่อน</div>
+          <div style="font-size:11px;color:var(--g4);margin-top:2px">รักษาการผู้จัดการแผนก · Level 9 · กำกับดูแล 5 หน่วยงาน 89 คน</div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:10px">
+          <div style="text-align:center;padding:8px 16px;background:var(--n1);border-radius:var(--r8)">
+            <div style="font-family:var(--display);font-size:20px;font-weight:800;color:var(--n7)">5</div>
+            <div style="font-size:10px;color:var(--g4)">หน่วยงาน</div>
+          </div>
+          <div style="text-align:center;padding:8px 16px;background:var(--t1);border-radius:var(--r8)">
+            <div style="font-family:var(--display);font-size:20px;font-weight:800;color:var(--t6)">89</div>
+            <div style="font-size:10px;color:var(--g4)">กำลังคน</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter tabs -->
+    <div style="display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap" id="org-filters">
+      <button class="org-ft active" onclick="filterOrg('all',this)">ทั้งหมด <span>89</span></button>
+      <button class="org-ft" onclick="filterOrg('INBOUND',this)">Inbound <span>29</span></button>
+      <button class="org-ft" onclick="filterOrg('OUTBOUND-SO',this)">OB-SO <span>23</span></button>
+      <button class="org-ft" onclick="filterOrg('OUTBOUND-STO',this)">OB-STO <span>29</span></button>
+      <button class="org-ft" onclick="filterOrg('Maintenance',this)">Maintenance <span>5</span></button>
+      <button class="org-ft" onclick="filterOrg('Safety',this)">Safety/HR <span>2</span></button>
+    </div>
+
+    <div id="org-cards-wrap" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
+    </div>
+  </div>
+
+  <!-- JD STATUS -->
+  <div id="p-jd" class="panel">
+    <div class="card">
+      <div class="chd"><div class="cico" style="background:var(--n1)"><i class="ti ti-progress" style="color:var(--n6)"></i></div><div class="cttl">ความคืบหน้าการกรอก JD</div><div class="cmeta">รวม 54 คน (ไม่รวม L7–9)</div></div>
+      <div class="pi"><div class="ph"><div class="phn"><i class="ti ti-tool" style="color:var(--t6)"></i>Maintenance</div><div class="php" style="color:var(--t6)">5 / 5 · 100%</div></div><div class="ptrk"><div class="pfill" style="width:100%;background:var(--t5)"></div></div></div>
+      <div class="pi"><div class="ph"><div class="phn"><i class="ti ti-arrow-down-circle" style="color:var(--n6)"></i>Inbound</div><div class="php" style="color:var(--a5)">1 / 24 · 4%</div></div><div class="ptrk"><div class="pfill" style="width:4%;background:var(--a4)"></div></div></div>
+      <div class="pi"><div class="ph"><div class="phn"><i class="ti ti-package" style="color:var(--n6)"></i>Outbound STO</div><div class="php" style="color:var(--a5)">2 / 5 · 40%</div></div><div class="ptrk"><div class="pfill" style="width:40%;background:var(--a4)"></div></div></div>
+      <div class="pi"><div class="ph"><div class="phn"><i class="ti ti-truck-delivery" style="color:var(--r5)"></i>Outbound SO</div><div class="php" style="color:var(--r5)">0 / 23 · 0%</div></div><div class="ptrk"><div class="pfill" style="width:0%;background:var(--r4)"></div></div></div>
+      <div class="pi" style="margin-bottom:0"><div class="ph"><div class="phn"><i class="ti ti-shield-check" style="color:var(--t6)"></i>Safety / ธุรการ</div><div class="php" style="color:var(--t6)">2 / 2 · 100%</div></div><div class="ptrk"><div class="pfill" style="width:100%;background:var(--t5)"></div></div></div>
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--g1);display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:12px;color:var(--g4)">ความคืบหน้ารวม</div>
+        <div style="font-family:var(--display);font-size:22px;font-weight:800;color:var(--a5);letter-spacing:-.02em">10 / 54 <span style="font-size:13px;font-weight:500;color:var(--g4);font-family:var(--font)">(18.5%)</span></div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+</div>
+</div>
+
+<!-- DRAWER -->
+<div class="ov" id="ov" onclick="clov(event)">
+  <div class="drw">
+    <div class="dh">
+      <div class="dav" id="dav">L5</div>
+      <div><div class="dname" id="dname">ชื่อ</div><div class="dmeta" id="dmeta">หน่วยงาน</div></div>
+      <button class="dcls" onclick="document.getElementById('ov').classList.remove('open')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="db" id="dbody"></div>
+  </div>
+</div>
+
+<script>
+const PEOPLE = [
+  {n:'นายนรินทร์ หมอป่า',d:'Maintenance',lv:7,pos:'ผู้ช่วยหัวหน้าหน่วยงาน',daily:9,wk:2,mo:2,tc:9,
+   act:{'ตรวจ/เช็ค/ซ่อมบำรุง':1,'ทำรายงาน / คีย์ข้อมูล (Admin & Report)':5.5,'ควบคุมงาน / หน้างาน (Floor Operation)':6,'ประชุม / พูดคุย (Meeting / Brief)':0.5},
+   tl:[{f:'d',a:'ประชุม / พูดคุย (Meeting / Brief)',det:'ประชุมต่อกะ / DOR ลำพูน',h:0.5,g:''},{f:'d',a:'ตรวจ/เช็ค/ซ่อมบำรุง',det:'ตรวจเช็คห้องเย็นประจำวัน',h:1,g:'Checklist ห้องเย็น'},{f:'d',a:'ทำรายงาน / คีย์ข้อมูล (Admin & Report)',det:'สรุปผลการทำงานวันก่อนหน้า',h:1,g:'Checklist ระบบสายพาน'},{f:'d',a:'ทำรายงาน / คีย์ข้อมูล (Admin & Report)',det:'จัดทำ E-App ต่างๆ',h:0.5,g:''},{f:'d',a:'ควบคุมงาน / หน้างาน (Floor Operation)',det:'Monitor ระบบสายพาน/ห้องเย็น',h:6,g:'Safety/Maintenance >> GMP'},{f:'w',a:'ทำรายงาน / คีย์ข้อมูล (Admin & Report)',det:'รายงานสรุป OT Plan/Act',h:1,g:'Weekly Report'},{f:'w',a:'ทำรายงาน / คีย์ข้อมูล (Admin & Report)',det:'รายงานสรุปค่าใช้จ่าย',h:1,g:''},{f:'m',a:'ทำรายงาน / คีย์ข้อมูล (Admin & Report)',det:'รายงานสรุป OT รายเดือน',h:1,g:''},{f:'m',a:'ทำรายงาน / คีย์ข้อมูล (Admin & Report)',det:'รายงานค่าใช้จ่ายรายเดือน',h:1,g:''}]},
+  {n:'นายภาคิณ ยามี',d:'Maintenance',lv:5,pos:'เจ้าหน้าที่',daily:9,wk:0,mo:0,tc:3,
+   act:{'ตรวจ/เช็ค/ซ่อมบำรุง':9},
+   tl:[{f:'d',a:'ตรวจ/เช็ค/ซ่อมบำรุง',det:'ตรวจเช็คห้องเย็นประจำวัน',h:2,g:'ส่งผลการตรวจ'},{f:'d',a:'ตรวจ/เช็ค/ซ่อมบำรุง',det:'ตรวจเช็คระบบสายพาน',h:2,g:''},{f:'d',a:'ตรวจ/เช็ค/ซ่อมบำรุง',det:'Monitor/งานซ่อมบำรุง',h:5,g:'GMP'}]},
+  {n:'นายนิธิกร คารินทา',d:'Maintenance',lv:5,pos:'เจ้าหน้าที่',daily:9,wk:0,mo:0,tc:3,
+   act:{'ตรวจ/เช็ค/ซ่อมบำรุง':9},
+   tl:[{f:'d',a:'ตรวจ/เช็ค/ซ่อมบำรุง',det:'ตรวจเช็คห้องเย็น',h:3,g:'ส่งผลการตรวจ'},{f:'d',a:'ตรวจ/เช็ค/ซ่อมบำรุง',det:'ตรวจเช็คระบบสายพาน',h:2,g:''},{f:'d',a:'ตรวจ/เช็ค/ซ่อมบำรุง',det:'Monitor/งานซ่อมบำรุง',h:4,g:'GMP'}]},
+  {n:'นายสุรศักดิ์ ต๊ะมา',d:'Maintenance',lv:5,pos:'เจ้าหน้าที่',daily:12,wk:0,mo:0,tc:6,
+   act:{'ตรวจ/เช็ค/ซ่อมบำรุง':12},
+   tl:[{f:'d',a:'ตรวจ/เช็ค/ซ่อมบำรุง',det:'ตรวจเช็คและซ่อมบำรุง (รวม OT 2h)',h:12,g:'ส่งผลการตรวจ'}]},
+  {n:'นายอนุชา ยาโน',d:'Maintenance',lv:5,pos:'เจ้าหน้าที่',daily:9,wk:0,mo:0,tc:4,
+   act:{'ตรวจ/เช็ค/ซ่อมบำรุง':9},
+   tl:[{f:'d',a:'ตรวจ/เช็ค/ซ่อมบำรุง',det:'งานซ่อมบำรุงและตรวจเช็คประจำวัน',h:9,g:'ส่งผลการตรวจ'}]},
+  {n:'ชลรบ หนูแก้ว',d:'Inbound',lv:8,pos:'หัวหน้าหน่วยงานรับสินค้า',daily:6,wk:0,mo:0,tc:7,
+   act:{'ประชุม / พูดคุย (Meeting / Brief)':1,'ทำรายงาน / คีย์ข้อมูล (Admin & Report)':0.5,'ประสานงาน / แก้ปัญหา (Coordination)':1,'ควบคุมงาน / หน้างาน (Floor Operation)':3.5},
+   tl:[{f:'d',a:'ประชุม / พูดคุย (Meeting / Brief)',det:'ประชุมพนักงานและ DOR',h:1,g:''},{f:'d',a:'ทำรายงาน / คีย์ข้อมูล (Admin & Report)',det:'สรุปค่าแรงและ OT',h:0.5,g:''},{f:'d',a:'ประสานงาน / แก้ปัญหา (Coordination)',det:'ตรวจสอบ Email/Line (เช้า)',h:0.5,g:''},{f:'d',a:'ควบคุมงาน / หน้างาน (Floor Operation)',det:'ลงพื้นที่ตรวจสอบการทำงาน',h:1.5,g:''},{f:'d',a:'ควบคุมงาน / หน้างาน (Floor Operation)',det:'ตรวจสอบงานเพิ่มเติม',h:0.5,g:''},{f:'d',a:'ประสานงาน / แก้ปัญหา (Coordination)',det:'ตรวจสอบ Email/Line (บ่าย)',h:0.5,g:''},{f:'d',a:'ควบคุมงาน / หน้างาน (Floor Operation)',det:'ลงพื้นที่รอบบ่าย',h:1.5,g:''}]},
+  {n:'นิมิต ผัดเจริญ',d:'Outbound STO',lv:8,pos:'หัวหน้าหน่วยงานคลังสินค้า',daily:40.5,wk:1.5,mo:0,tc:10,
+   act:{'ประชุม / พูดคุย (Meeting / Brief)':2.5,'ทำรายงาน / คีย์ข้อมูล (Admin & Report)':11.5,'ควบคุมงาน / หน้างาน (Floor Operation)':27},
+   tl:[{f:'d',a:'ประชุม / พูดคุย (Meeting / Brief)',det:'ประชุม DOR LPN',h:0.5,g:''},{f:'d',a:'ประชุม / พูดคุย (Meeting / Brief)',det:'ประชุม DOR 3PL',h:1,g:''},{f:'d',a:'ทำรายงาน / คีย์ข้อมูล (Admin & Report)',det:'E-Approve / ลงข้อมูล Daily',h:1,g:''},{f:'d',a:'ทำรายงาน / คีย์ข้อมูล (Admin & Report)',det:'ทำข้อมูลสรุปงานประจำวัน',h:1,g:''},{f:'d',a:'ควบคุมงาน / หน้างาน (Floor Operation)',det:'สรุป Stock ประจำวัน',h:3,g:''},{f:'d',a:'ทำรายงาน / คีย์ข้อมูล (Admin & Report)',det:'Email ตรวจสอบ/ตอบกลับ/แก้ปัญหา/วางแผน',h:9,g:''},{f:'d',a:'ควบคุมงาน / หน้างาน (Floor Operation)',det:'ควบคุม/รับผิดชอบ/แก้ปัญหา On Call',h:24,g:'⚠ ควรแยกออกจากชม.ทำงานจริง'},{f:'d',a:'ประชุม / พูดคุย (Meeting / Brief)',det:'ประชุมหัวหน้า สรุปงาน วางแผนวันถัดไป',h:1,g:''},{f:'w',a:'ทำรายงาน / คีย์ข้อมูล (Admin & Report)',det:'ตรวจสอบค่าเหมาขึ้นสินค้าประจำสัปดาห์',h:0.5,g:''},{f:'w',a:'ประชุม / พูดคุย (Meeting / Brief)',det:'ประชุมหัวหน้า วางแผนสัปดาห์ถัดไป',h:1,g:''}]},
+  {n:'ธนเดช เทพศิริ',d:'Outbound STO',lv:6,pos:'เจ้าหน้าที่อาวุโส',daily:2,wk:0,mo:0,tc:5,
+   act:{'ประชุม / พูดคุย (Meeting / Brief)':1,'ควบคุมงาน / หน้างาน (Floor Operation)':0.5,'ทำรายงาน / คีย์ข้อมูล (Admin & Report)':0.5},
+   tl:[{f:'d',a:'ประชุม / พูดคุย (Meeting / Brief)',det:'ประชุมพนักงาน',h:0.5,g:''},{f:'d',a:'ควบคุมงาน / หน้างาน (Floor Operation)',det:'ควบคุม Check Stock พื้นที่ที่ได้รับมอบหมาย',h:0.5,g:''},{f:'d',a:'ทำรายงาน / คีย์ข้อมูล (Admin & Report)',det:'ลงข้อมูลสรุปงานประจำวัน',h:0.5,g:''},{f:'d',a:'ประชุม / พูดคุย (Meeting / Brief)',det:'ประชุม DOR LPN',h:0.5,g:''}]},
+  {n:'ลิปดา ชัยพฤกษ์',d:'ธุรการ',lv:6,pos:'เจ้าหน้าที่อาวุโส',daily:0.5,wk:1,mo:0,tc:8,
+   act:{'ทำรายงาน / คีย์ข้อมูล (Admin & Report)':3.5},
+   tl:[{f:'d',a:'ทำรายงาน / คีย์ข้อมูล (Admin & Report)',det:'ตรวจนับเงินสำรองจ่าย',h:0.5,g:''},{f:'w',a:'ทำรายงาน / คีย์ข้อมูล (Admin & Report)',det:'ตั้งเบิกค่าเหมาขึ้น-ลงสินค้า',h:1,g:''},{f:'15d',a:'ทำรายงาน / คีย์ข้อมูล (Admin & Report)',det:'ตั้งเบิกค่าเช่ารถกระจาย',h:2,g:''},{f:'15d',a:'ทำรายงาน / คีย์ข้อมูล (Admin & Report)',det:'ส่งตารางเวลาพนักงานรายวัน (วันที่ 1 และ 16)',h:0,g:''},{f:'w',a:'ทำรายงาน / คีย์ข้อมูล (Admin & Report)',det:'Confirm Shipment Cost ส่งให้ Lay',h:0,g:''},{f:'w',a:'ทำรายงาน / คีย์ข้อมูล (Admin & Report)',det:'วางบิลค่าขนส่ง',h:0,g:''},{f:'w',a:'ทำรายงาน / คีย์ข้อมูล (Admin & Report)',det:'ลงเวลาพนักงาน/เซทกะ',h:0,g:''}]},
+  {n:'จักรพันธ์ จันทร์บูรณ์',d:'Safety',lv:5,pos:'เจ้าหน้าที่',daily:0.5,wk:0,mo:0,tc:1,
+   act:{'ประชุม / พูดคุย (Meeting / Brief)':0.5},
+   tl:[{f:'d',a:'ประชุม / พูดคุย (Meeting / Brief)',det:'ประชุมประจำวัน',h:0.5,g:''}]},
+];
+
+const AC={
+  'ตรวจ/เช็ค/ซ่อมบำรุง':'#533AB7',
+  'ควบคุมงาน / หน้างาน (Floor Operation)':'#163570',
+  'ทำรายงาน / คีย์ข้อมูล (Admin & Report)':'#2A6CC8',
+  'ประชุม / พูดคุย (Meeting / Brief)':'#E07B00',
+  'ประสานงาน / แก้ปัญหา (Coordination)':'#85B3E8',
+};
+const AS={
+  'ตรวจ/เช็ค/ซ่อมบำรุง':'ซ่อมบำรุง',
+  'ควบคุมงาน / หน้างาน (Floor Operation)':'Floor Ops',
+  'ทำรายงาน / คีย์ข้อมูล (Admin & Report)':'Admin',
+  'ประชุม / พูดคุย (Meeting / Brief)':'Meeting',
+  'ประสานงาน / แก้ปัญหา (Coordination)':'Coord',
+};
+const LVC={3:'#C0D8F5',4:'#85B3E8',5:'#2A6CC8',6:'#1E4D9E',7:'#2DC99F',8:'#0A5240',9:'#061325'};
+const LVT={3:'#163570',4:'#0D2347',5:'#fff',6:'#fff',7:'#fff',8:'#fff',9:'#fff'};
+
+function sv(p){
+  if(p.tc===0) return {s:'na',lbl:'ยังไม่มีข้อมูล',cls:'na',box:'na',ico:'ti-minus'};
+  if(p.n.includes('นิมิต')) return {s:'wn',lbl:'ตรวจสอบ',cls:'wn',box:'wn',ico:'ti-alert-triangle'};
+  if(p.daily>9) return {s:'ov',lbl:'OT +'+(p.daily-9)+'h',cls:'ov',box:'ov',ico:'ti-flame'};
+  if(p.daily>=7) return {s:'ok',lbl:'เหมาะสม '+p.daily+'h',cls:'ok',box:'ok',ico:'ti-check'};
+  if(p.daily>0) return {s:'lo',lbl:'Underload '+p.daily+'h',cls:'lo',box:'lo',ico:'ti-arrow-down'};
+  return {s:'na',lbl:'ยังไม่มีข้อมูล',cls:'na',box:'na',ico:'ti-minus'};
+}
+const SMSG={
+  ok:p=>'ชั่วโมงงาน '+p.daily+'h อยู่ในเกณฑ์ 7–9h (รวมพัก 1h) เหมาะสมกับ Level '+p.lv,
+  ov:p=>'ชั่วโมงงาน '+p.daily+'h เกินมาตรฐาน — OT '+(p.daily-9)+'h ต่อวัน ควรพิจารณาแบ่งงานหรือทบทวนการจัดกะ',
+  lo:p=>'ชั่วโมงงาน '+p.daily+'h ต่ำกว่าเกณฑ์ — อาจกรอกข้อมูลไม่ครบ',
+  wn:p=>'มีรายการ "On Call 24h" รวมเป็นชม.งาน — ควรแยก "ความรับผิดชอบ" ออกจาก "ชม.ทำงานจริง"',
+  na:p=>'ยังไม่ได้กรอก Job Description',
+};
+
+function buildTable(){
+  const tb=document.getElementById('wtbody');
+  PEOPLE.forEach(function(p,i){
+    var s=sv(p),ma=Object.entries(p.act).sort(function(a,b){return b[1]-a[1]})[0];
+    var pct=Math.min(Math.round(p.daily/13*100),100);
+    var bc=p.daily>9?'#C0392B':p.daily>=7?'#0A5240':'#2A6CC8';
+    var init=p.n.replace(/นาย|นางสาว|นาง/g,'').trim().split(' ').map(function(x){return x[0]}).join('').slice(0,2);
+    var tr=document.createElement('tr');
+    tr.onclick=function(){openDrawer(i)};
+    tr.innerHTML='<td><div class="pc2"><div class="av" style="background:'+LVC[p.lv]+';color:'+LVT[p.lv]+'">'+init+'</div><div><div class="pn2">'+p.n+'</div><div class="pd">'+p.d+'</div></div></div></td>'
+      +'<td><span style="display:inline-block;background:'+LVC[p.lv]+';color:'+LVT[p.lv]+';font-family:var(--mono);font-size:9.5px;font-weight:700;padding:2px 9px;border-radius:999px">L'+p.lv+'</span></td>'
+      +'<td><div class="hrow"><div class="htrk"><div class="hfill" style="width:'+pct+'%;background:'+bc+'"></div><div class="hmrk"></div></div><div class="hval" style="color:'+bc+'">'+p.daily+'h</div></div></td>'
+      +'<td style="font-size:11.5px">'+(ma?'<span style="display:inline-flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:'+AC[ma[0]]+';display:inline-block"></span>'+(AS[ma[0]]||ma[0])+'</span>':'–')+'</td>'
+      +'<td><span class="chip '+s.cls+'"><i class="ti '+s.ico+'"></i>'+s.lbl+'</span></td>';
+    tb.appendChild(tr);
+  });
+}
+
+function openDrawer(i){
+  var p=PEOPLE[i],s=sv(p);
+  var fmap={d:'ประจำวัน',w:'ประจำสัปดาห์',m:'ประจำเดือน','15d':'ทุก 15 วัน'};
+  var fcls={d:'fd',w:'fw',m:'fm','15d':'f15'};
+  var init=p.n.replace(/นาย|นางสาว|นาง/g,'').trim().split(' ').map(function(x){return x[0]}).join('').slice(0,2);
+  document.getElementById('dav').textContent='L'+p.lv;
+  document.getElementById('dav').style.background=LVC[p.lv];
+  document.getElementById('dav').style.color=LVT[p.lv];
+  document.getElementById('dname').textContent=p.n;
+  document.getElementById('dmeta').textContent=p.d+' · '+p.pos+' · Level '+p.lv;
+  var tasks=p.tl.map(function(t){
+    return '<div class="titem">'
+      +'<span class="fp '+(fcls[t.f]||'fd')+'">'+(fmap[t.f]||t.f)+'</span>'
+      +'<div class="tb2"><div class="ta"><span class="tadot" style="background:'+(AC[t.a]||'#888')+'"></span>'+(AS[t.a]||t.a)+'</div>'
+      +'<div class="tdet">'+(t.det||'–')+'</div>'
+      +(t.g?'<span class="tgap">'+t.g+'</span>':'')
+      +'</div><div class="th">'+(t.h>0?t.h+'h':'')+'</div></div>';
+  }).join('');
+  var diff=p.daily-9;
+  document.getElementById('dbody').innerHTML=
+    '<div class="dkpis">'
+    +'<div class="dk"><div class="dkv" style="color:'+(p.daily>9?'#C0392B':p.daily>=7?'#0A5240':'#1E4D9E')+'">'+p.daily+'h</div><div class="dkl">ชม./วัน</div></div>'
+    +'<div class="dk"><div class="dkv">'+(diff>0?'+'+diff+'h OT':p.daily>=7?'ปกติ':'ต่ำ')+'</div><div class="dkl">vs 9h</div></div>'
+    +'<div class="dk"><div class="dkv">'+p.wk+'h</div><div class="dkl">รายสัปดาห์</div></div>'
+    +'<div class="dk"><div class="dkv">'+p.tc+'</div><div class="dkl">จำนวนงาน</div></div>'
+    +'</div>'
+    +'<div class="sbox '+s.box+'"><div class="sbt">'+s.lbl+'</div><div class="sbd">'+(SMSG[s.s]||SMSG.na)(p)+'</div></div>'
+    +(p.tl.length>0
+      ? '<div class="tsec"><i class="ti ti-list-check"></i>รายการงานทั้งหมด</div>'+tasks
+      : '<div style="text-align:center;padding:28px 0;color:var(--g3)"><i class="ti ti-file-off" style="font-size:36px;display:block;margin-bottom:8px"></i>ยังไม่มีข้อมูล JD</div>');
+  document.getElementById('ov').classList.add('open');
+}
+
+function clov(e){if(e.target===document.getElementById('ov'))document.getElementById('ov').classList.remove('open')}
+
+function nav(el,name){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on')});
+  document.getElementById('p-'+name).classList.add('on');
+  document.querySelectorAll('.sb-item').forEach(function(i){i.classList.remove('on')});
+  el.classList.add('on');
+  var t={overview:'ภาพรวมกำลังคน',workload:'ภาระงานรายบุคคล',suit:'ความเหมาะสม Level vs งาน',gap:'Gap Analysis',jd:'สถานะการกรอก JD',org:'Organization Chart'};
+  document.getElementById('tbt').textContent=t[name]||name;
+  document.getElementById('tbc').textContent=t[name]||name;
+}
+
+new Chart(document.getElementById('posChart'),{
+  type:'doughnut',
+  data:{labels:['พนักงาน','พนักงานรายวัน','เจ้าหน้าที่','จนท.อาวุโส','หัวหน้า+'],
+    datasets:[{data:[31,28,18,6,6],backgroundColor:['#163570','#2A6CC8','#85B3E8','#0F7A5F','#2DC99F'],borderWidth:4,borderColor:'#fff'}]},
+  options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(d){return d.label+': '+d.raw+' คน ('+Math.round(d.raw/89*100)+'%)';}}}}}
+});
+
+var hD=PEOPLE.filter(function(p){return p.daily>0});
+new Chart(document.getElementById('hoursChart'),{
+  type:'bar',
+  data:{
+    labels:hD.map(function(p){var w=p.n.replace(/นาย|นางสาว|นาง/g,'').trim().split(' ');return w[w.length-1]}),
+    datasets:[
+      {label:'ชม./วัน',data:hD.map(function(p){return Math.min(p.daily,13)}),
+       backgroundColor:hD.map(function(p){return p.daily>9?'#C0392B':p.daily>=7?'#0A5240':'#2A6CC8'}),
+       borderRadius:6,borderSkipped:false},
+      {type:'line',label:'9h มาตรฐาน',data:hD.map(function(){return 9}),
+       borderColor:'#E07B00',borderWidth:2,borderDash:[5,3],pointRadius:0,fill:false,tension:0}
+    ]
+  },
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{title:function(i){return hD[i[0].dataIndex].n},label:function(d){return d.dataset.label+': '+d.raw+'h'}}}},
+    scales:{y:{beginAtZero:true,max:14,ticks:{callback:function(v){return v+'h'},font:{size:11}},grid:{color:'rgba(0,0,0,.04)'}},
+            x:{grid:{display:false},ticks:{font:{size:10},maxRotation:35}}}}
+});
+
+new Chart(document.getElementById('actChart'),{
+  type:'doughnut',
+  data:{labels:['ซ่อมบำรุง','Floor Ops','Admin','Meeting','Coord'],
+    datasets:[{data:[49.5,36.5,8.5,5.5,1],backgroundColor:['#533AB7','#163570','#2A6CC8','#E07B00','#85B3E8'],borderWidth:4,borderColor:'#fff'}]},
+  options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(d){return d.label+': '+d.raw+'h'}}}}}
+});
+
+var actTypes=Object.keys(AC);
+var sD=PEOPLE.filter(function(p){return Object.keys(p.act).length>0});
+new Chart(document.getElementById('suitChart'),{
+  type:'bar',
+  data:{
+    labels:sD.map(function(p){var w=p.n.replace(/นาย|นางสาว|นาง/g,'').trim().split(' ');return w[w.length-1]}),
+    datasets:actTypes.map(function(act){return{
+      label:AS[act],
+      data:sD.map(function(p){var t=Object.values(p.act).reduce(function(a,b){return a+b},0)||1;return p.act[act]?Math.round(p.act[act]/t*100):0}),
+      backgroundColor:AC[act],borderRadius:3
+    }})
+  },
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:function(d){return d.dataset.label+': '+d.raw+'%'}}}},
+    scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10},maxRotation:35}},
+            y:{stacked:true,max:100,ticks:{callback:function(v){return v+'%'},font:{size:11}},grid:{color:'rgba(0,0,0,.04)'}}}}
+});
+
+
+var ORG = [
+  // INBOUND
+  {n:'นายชลรบ หนูแก้ว',lv:8,pos:'หัวหน้าหน่วยงาน',dept:'INBOUND'},
+  {n:'นายผดุงศักดิ์ มาลา',lv:7,pos:'ผู้ช่วยหัวหน้าหน่วยงาน',dept:'INBOUND'},
+  {n:'นายสมศักดิ์ ปินัน',lv:6,pos:'เจ้าหน้าที่อาวุโส',dept:'INBOUND'},
+  {n:'นายนิวัฒน์ กันทวงค์',lv:6,pos:'เจ้าหน้าที่อาวุโส',dept:'INBOUND'},
+  {n:'นายทินกร อินต๊ะสอน',lv:5,pos:'เจ้าหน้าที่',dept:'INBOUND'},
+  {n:'นายนันทวรรษ พลอยแสนรัก',lv:5,pos:'เจ้าหน้าที่',dept:'INBOUND'},
+  {n:'นายธวัชชัย ใจต่อม',lv:4,pos:'พนักงาน',dept:'INBOUND'},
+  {n:'นายประพนธ์ สายแจ้',lv:4,pos:'พนักงาน',dept:'INBOUND'},
+  {n:'นายจายน้อง คำลือ',lv:4,pos:'พนักงาน',dept:'INBOUND'},
+  {n:'นายนพดล ศิริตา',lv:4,pos:'พนักงาน',dept:'INBOUND'},
+  {n:'นายอภิชาติ ยะชัย',lv:4,pos:'พนักงาน',dept:'INBOUND'},
+  {n:'นายบุญเสริม สรานนท์นาคกุล',lv:4,pos:'พนักงาน',dept:'INBOUND'},
+  {n:'นายอนัน นายสม',lv:4,pos:'พนักงาน',dept:'INBOUND'},
+  {n:'นายปราโมทย์ พรมมาจินดา',lv:4,pos:'พนักงาน',dept:'INBOUND'},
+  {n:'นายภูวดล ธนปัญญาเกษม',lv:4,pos:'พนักงาน',dept:'INBOUND'},
+  {n:'นลธวัช ชัยกาวิล',lv:3,pos:'พนักงานรายวัน',dept:'INBOUND'},
+  {n:'ธนากร ศรีวิชัย',lv:3,pos:'พนักงานรายวัน',dept:'INBOUND'},
+  {n:'นายณัฐนันท์ กันทะวรรณ์',lv:3,pos:'พนักงานรายวัน',dept:'INBOUND'},
+  {n:'พงษ์สุพัฒน์ อุ่นตาล',lv:3,pos:'พนักงานรายวัน',dept:'INBOUND'},
+  {n:'นายผดุงเกียรติ แปงงา',lv:3,pos:'พนักงานรายวัน',dept:'INBOUND'},
+  {n:'มงคล ภักดีเวียง',lv:3,pos:'พนักงานรายวัน',dept:'INBOUND'},
+  {n:'นายวิทวัช คนเที่ยง',lv:3,pos:'พนักงานรายวัน',dept:'INBOUND'},
+  {n:'นายนนทพัทธ์ ปันมิตร',lv:3,pos:'พนักงานรายวัน',dept:'INBOUND'},
+  {n:'ปริญญา ปินตาวะนา',lv:3,pos:'พนักงานรายวัน',dept:'INBOUND'},
+  {n:'ธนวิชญ์ น้อมเศียร์',lv:3,pos:'พนักงานรายวัน',dept:'INBOUND'},
+  {n:'ธนชาติ เกี๋ยงคำ',lv:3,pos:'พนักงานรายวัน',dept:'INBOUND'},
+  {n:'ณัฐพล โคตะมะ',lv:3,pos:'พนักงานรายวัน',dept:'INBOUND'},
+  {n:'ศราวุธ คูณชัย',lv:3,pos:'พนักงานรายวัน',dept:'INBOUND'},
+  {n:'สมชาย จิรพัฒน์สกูล',lv:3,pos:'พนักงานรายวัน',dept:'INBOUND'},
+  // OUTBOUND-SO
+  {n:'นายขจรศักดิ์ เวทศักดิ์',lv:8,pos:'หัวหน้าหน่วยงาน',dept:'OUTBOUND-SO'},
+  {n:'นายดนุพล ทองบริสุทธิ์',lv:6,pos:'เจ้าหน้าที่อาวุโส',dept:'OUTBOUND-SO'},
+  {n:'นางสาวจันทร์ทา พรมมาลา',lv:5,pos:'เจ้าหน้าที่',dept:'OUTBOUND-SO'},
+  {n:'นางสาวกาญจรัตน์ พรหมจักร์',lv:5,pos:'เจ้าหน้าที่',dept:'OUTBOUND-SO'},
+  {n:'นางสาววรรณารัตน์ จันทร์ตาใหม่',lv:5,pos:'เจ้าหน้าที่',dept:'OUTBOUND-SO'},
+  {n:'นางสาวรัตนา อินทร์ศรี',lv:5,pos:'เจ้าหน้าที่',dept:'OUTBOUND-SO'},
+  {n:'นายทนงศักดิ์ ปัญญา',lv:5,pos:'เจ้าหน้าที่',dept:'OUTBOUND-SO'},
+  {n:'นางนุชจรา เวทศักดิ์',lv:5,pos:'เจ้าหน้าที่',dept:'OUTBOUND-SO'},
+  {n:'นางสาวณัฎฐิยาพร ชะนะดัง',lv:5,pos:'เจ้าหน้าที่',dept:'OUTBOUND-SO'},
+  {n:'นายอินทร์จันทร์ นิมิตรศิลป์',lv:5,pos:'เจ้าหน้าที่',dept:'OUTBOUND-SO'},
+  {n:'นายสุริยา กันทะลอม',lv:4,pos:'พนักงาน',dept:'OUTBOUND-SO'},
+  {n:'นายธนพงษ์ คีรีโชคสมบูรณ์',lv:4,pos:'พนักงาน',dept:'OUTBOUND-SO'},
+  {n:'นายปราโมทย์ นันสาย',lv:4,pos:'พนักงาน',dept:'OUTBOUND-SO'},
+  {n:'นายสุรพล คีรีสุภาสิน',lv:4,pos:'พนักงาน',dept:'OUTBOUND-SO'},
+  {n:'นายณัฐวุฒิ กันธิโน',lv:4,pos:'พนักงาน',dept:'OUTBOUND-SO'},
+  {n:'นางอารีรัตน์ ชะนะดัง',lv:3,pos:'พนักงานรายวัน',dept:'OUTBOUND-SO'},
+  {n:'นายสมปรารถนา สุระ',lv:3,pos:'พนักงานรายวัน',dept:'OUTBOUND-SO'},
+  {n:'นางสาวภาการิน เขียวโย',lv:3,pos:'พนักงานรายวัน',dept:'OUTBOUND-SO'},
+  {n:'นายพลวัฒน์ คำปน',lv:3,pos:'พนักงานรายวัน',dept:'OUTBOUND-SO'},
+  {n:'นายชิราวุธ แก้วสิมมา',lv:3,pos:'พนักงานรายวัน',dept:'OUTBOUND-SO'},
+  {n:'นายชินกร ชุนกลาง',lv:3,pos:'พนักงานรายวัน',dept:'OUTBOUND-SO'},
+  {n:'นางสาวฉวีวรรณ ตุ่นกาศ',lv:3,pos:'พนักงานรายวัน',dept:'OUTBOUND-SO'},
+  {n:'นายพีรยุทธ บุปผาเศวต',lv:3,pos:'พนักงานรายวัน',dept:'OUTBOUND-SO'},
+  // OUTBOUND-STO
+  {n:'นายนิมิต ผัดเจริญ',lv:8,pos:'หัวหน้าหน่วยงาน',dept:'OUTBOUND-STO'},
+  {n:'นายประทุม ศรีธง',lv:6,pos:'เจ้าหน้าที่อาวุโส',dept:'OUTBOUND-STO'},
+  {n:'นายธนเดช เทพศิริ',lv:6,pos:'เจ้าหน้าที่อาวุโส',dept:'OUTBOUND-STO'},
+  {n:'นายจิรพันธ์ คำมะยอม',lv:5,pos:'เจ้าหน้าที่',dept:'OUTBOUND-STO'},
+  {n:'นายนรชัย ชัยชนะ',lv:5,pos:'เจ้าหน้าที่',dept:'OUTBOUND-STO'},
+  {n:'นายเฉลิมศักดิ์ ดีติ๊บ',lv:5,pos:'เจ้าหน้าที่',dept:'OUTBOUND-STO'},
+  {n:'นายทูรย์ สิงห์ใจ',lv:4,pos:'พนักงาน',dept:'OUTBOUND-STO'},
+  {n:'นายเปียว หมื่นอานา',lv:4,pos:'พนักงาน',dept:'OUTBOUND-STO'},
+  {n:'นายมน -',lv:4,pos:'พนักงาน',dept:'OUTBOUND-STO'},
+  {n:'Mr.SAI NON',lv:4,pos:'พนักงาน',dept:'OUTBOUND-STO'},
+  {n:'นายเมือง บุญนำ',lv:4,pos:'พนักงาน',dept:'OUTBOUND-STO'},
+  {n:'นายวรวุฒิ ปัญญากุศล',lv:4,pos:'พนักงาน',dept:'OUTBOUND-STO'},
+  {n:'นายเสกสรร นันต๊ะสุ',lv:4,pos:'พนักงาน',dept:'OUTBOUND-STO'},
+  {n:'นายวิชิต ปัญญาสกุลไพร',lv:4,pos:'พนักงาน',dept:'OUTBOUND-STO'},
+  {n:'นายใส ตาบุญ',lv:4,pos:'พนักงาน',dept:'OUTBOUND-STO'},
+  {n:'นายสุภาพ เมืองใจ',lv:4,pos:'พนักงาน',dept:'OUTBOUND-STO'},
+  {n:'นายกฤษณะ คำเครือ',lv:4,pos:'พนักงาน',dept:'OUTBOUND-STO'},
+  {n:'นายรัชตะ ซูประโคน',lv:4,pos:'พนักงาน',dept:'OUTBOUND-STO'},
+  {n:'นายจิรายุทธ อิ่นคำ',lv:4,pos:'พนักงาน',dept:'OUTBOUND-STO'},
+  {n:'นายธนวัฒน์ ยะสะนะ',lv:4,pos:'พนักงาน',dept:'OUTBOUND-STO'},
+  {n:'นายธีรวัต สุภาพันธ์',lv:4,pos:'พนักงาน',dept:'OUTBOUND-STO'},
+  {n:'นายอนุสรณ์ สีสง่า',lv:4,pos:'พนักงาน',dept:'OUTBOUND-STO'},
+  {n:'นายวิทยา บุญสูง',lv:4,pos:'พนักงาน',dept:'OUTBOUND-STO'},
+  {n:'นายเกษม สุหล้า',lv:3,pos:'พนักงานรายวัน',dept:'OUTBOUND-STO'},
+  {n:'นายประดิษฐ์ คำแก้วแจ่ม',lv:3,pos:'พนักงานรายวัน',dept:'OUTBOUND-STO'},
+  {n:'นายชนินทร มณีแดง',lv:3,pos:'พนักงานรายวัน',dept:'OUTBOUND-STO'},
+  {n:'นายวสันต์ ปรารมย์',lv:3,pos:'พนักงานรายวัน',dept:'OUTBOUND-STO'},
+  {n:'สราวุธ ไชยสาร',lv:3,pos:'พนักงานรายวัน',dept:'OUTBOUND-STO'},
+  {n:'นรินทร์ ปัญโญใหญ่',lv:3,pos:'พนักงานรายวัน',dept:'OUTBOUND-STO'},
+  // Maintenance
+  {n:'นายนรินทร์ หมอป่า',lv:7,pos:'ผู้ช่วยหัวหน้าหน่วยงาน',dept:'Maintenance'},
+  {n:'นายภาคิณ ยามี',lv:5,pos:'เจ้าหน้าที่',dept:'Maintenance'},
+  {n:'นายนิธิกร คารินทา',lv:5,pos:'เจ้าหน้าที่',dept:'Maintenance'},
+  {n:'นายสุรศักดิ์ ต๊ะมา',lv:5,pos:'เจ้าหน้าที่',dept:'Maintenance'},
+  {n:'นายอนุชา ยาโน',lv:5,pos:'เจ้าหน้าที่',dept:'Maintenance'},
+  // Safety/HR
+  {n:'นางสาวลิปดา ชัยพฤกษ์',lv:6,pos:'เจ้าหน้าที่อาวุโส',dept:'Safety'},
+  {n:'นายจักรพันธ์ จันทร์บูรณ์',lv:5,pos:'เจ้าหน้าที่',dept:'Safety'},
+];
+
+var DEPT_META = {
+  'INBOUND':     {label:'Inbound',      ico:'ti-arrow-down-circle', c1:'#163570', c2:'#EBF3FC', count:29},
+  'OUTBOUND-SO': {label:'Outbound SO',  ico:'ti-truck-delivery',    c1:'#2A6CC8', c2:'#EBF3FC', count:23},
+  'OUTBOUND-STO':{label:'Outbound STO', ico:'ti-package',           c1:'#4D88D6', c2:'#EBF3FC', count:29},
+  'Maintenance': {label:'Maintenance',  ico:'ti-tool',              c1:'#0F7A5F', c2:'#E8FAF5', count:5},
+  'Safety':      {label:'Safety/HR',    ico:'ti-shield-check',      c1:'#14A37F', c2:'#E8FAF5', count:2},
+};
+
+function getInitials(name) {
+  var clean = name.replace(/นาย|นางสาว|นาง|Mr\./g,'').trim().split(' ');
+  return clean.map(function(x){return x[0]||''}).join('').slice(0,2).toUpperCase();
+}
+
+var currentFilter = 'all';
+
+function renderOrgCards(filter) {
+  var wrap = document.getElementById('org-cards-wrap');
+  wrap.innerHTML = '';
+  var list = filter === 'all' ? ORG : ORG.filter(function(p){ return p.dept === filter; });
+
+  // Group by dept
+  var groups = {};
+  list.forEach(function(p){
+    if(!groups[p.dept]) groups[p.dept] = [];
+    groups[p.dept].push(p);
+  });
+
+  var cols = filter === 'all' ? 5 : Math.min(list.length, 5);
+  wrap.style.gridTemplateColumns = 'repeat('+cols+',1fr)';
+
+  if(filter !== 'all') {
+    // Single dept: show dept header then cards
+    var dm = DEPT_META[filter] || {label:filter, ico:'ti-users', c1:'#163570', c2:'#EBF3FC'};
+    var hdr = document.createElement('div');
+    hdr.style.cssText = 'grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:12px 16px;background:'+dm.c2+';border-radius:var(--r12);margin-bottom:2px;border-left:4px solid '+dm.c1;
+    hdr.innerHTML = '<i class="ti '+dm.ico+'" style="font-size:18px;color:'+dm.c1+'"></i>'
+      +'<span style="font-family:var(--display);font-size:14px;font-weight:700;color:'+dm.c1+'">'+dm.label+'</span>'
+      +'<span style="font-family:var(--mono);font-size:10px;color:var(--g4);margin-left:4px">'+list.length+' คน</span>';
+    wrap.appendChild(hdr);
+    list.forEach(function(p){ wrap.appendChild(makeCard(p)); });
+  } else {
+    // All: show each dept as a column
+    var deptOrder = ['INBOUND','OUTBOUND-SO','OUTBOUND-STO','Maintenance','Safety'];
+    deptOrder.forEach(function(d){
+      var dm = DEPT_META[d] || {label:d, ico:'ti-users', c1:'#163570', c2:'#EBF3FC'};
+      var col = document.createElement('div');
+      col.style.cssText = 'display:flex;flex-direction:column;gap:6px';
+
+      // Dept header
+      var hdr = document.createElement('div');
+      hdr.style.cssText = 'padding:10px 12px;background:'+dm.c2+';border-radius:var(--r8);border-top:3px solid '+dm.c1+';margin-bottom:2px;text-align:center';
+      hdr.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:4px">'
+        +'<i class="ti '+dm.ico+'" style="font-size:14px;color:'+dm.c1+'"></i>'
+        +'<span style="font-family:var(--display);font-size:12px;font-weight:700;color:'+dm.c1+'">'+dm.label+'</span>'
+        +'</div>'
+        +'<span style="font-family:var(--mono);font-size:11px;color:var(--g4)">'+dm.count+' คน</span>';
+      col.appendChild(hdr);
+
+      var members = groups[d] || [];
+      members.forEach(function(p){ col.appendChild(makeCard(p)); });
+      wrap.appendChild(col);
+    });
+  }
+}
+
+function makeCard(p) {
+  var dm = DEPT_META[p.dept] || {c1:'#163570',c2:'#EBF3FC'};
+  var lvc = ['','','','#C0D8F5','#85B3E8','#2A6CC8','#1E4D9E','#2DC99F','#0A5240','#061325'];
+  var lvt = ['','','','#163570','#0D2347','#fff','#fff','#fff','#fff','#fff'];
+  var bg = lvc[p.lv]||'#eee', fg = lvt[p.lv]||'#333';
+  var isHead = p.lv >= 7;
+  var isSr = p.lv === 6;
+
+  var card = document.createElement('div');
+  card.style.cssText = 'background:var(--white);border:1px solid var(--g2);border-radius:var(--r8);padding:10px 10px 8px;'
+    +(isHead?'border-top:2px solid '+dm.c1+';':'')
+    +'transition:box-shadow .12s,transform .12s;cursor:default';
+  card.onmouseenter = function(){ this.style.boxShadow='0 4px 14px rgba(0,0,0,.08)'; this.style.transform='translateY(-2px)'; };
+  card.onmouseleave = function(){ this.style.boxShadow=''; this.style.transform=''; };
+
+  var init = getInitials(p.n);
+  card.innerHTML =
+    '<div style="display:flex;align-items:flex-start;gap:8px">'
+    +'<div style="width:32px;height:32px;border-radius:50%;background:'+bg+';color:'+fg+';display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:10px;font-weight:700;flex-shrink:0">'
+      +(isHead?'<i class="ti ti-crown" style="font-size:12px"></i>':init)
+    +'</div>'
+    +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:11px;font-weight:'+(isHead?'700':'500')+';color:var(--g9);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.n+'</div>'
+      +'<div style="font-size:10px;color:var(--g4);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.pos+'</div>'
+    +'</div>'
+    +'</div>'
+    +'<div style="margin-top:7px;display:flex;align-items:center;justify-content:space-between">'
+    +'<span style="font-family:var(--mono);font-size:9px;font-weight:700;padding:1px 6px;border-radius:999px;background:'+bg+';color:'+fg+'">L'+p.lv+'</span>'
+    +(isHead?'<span style="font-size:9px;color:'+dm.c1+';font-weight:600;display:flex;align-items:center;gap:2px"><i class="ti ti-star" style="font-size:9px"></i>หัวหน้า</span>':'')
+    +(isSr&&!isHead?'<span style="font-size:9px;color:var(--g4)">อาวุโส</span>':'')
+    +'</div>';
+  return card;
+}
+
+function filterOrg(dept, el) {
+  currentFilter = dept;
+  document.querySelectorAll('.org-ft').forEach(function(b){ b.classList.remove('active'); });
+  el.classList.add('active');
+  renderOrgCards(dept);
+}
+
+
+buildTable();
+renderOrgCards("all");
+</script>
+</body>
+</html>
