@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WH Lampoon · Workload</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#09090b;--ink2:#52525b;--ink3:#a1a1aa;
+  --paper:#ffffff;--surface:#fafafa;--surface2:#f4f4f5;
+  --line:#e4e4e7;--line2:#d4d4d8;
+  --ok:#16a34a;--ok-dim:#dcfce7;--ok-mid:#bbf7d0;
+  --warn:#d97706;--warn-dim:#fef9c3;--warn-mid:#fde68a;
+  --over:#dc2626;--over-dim:#fee2e2;--over-mid:#fecaca;
+  --miss:#7c3aed;--miss-dim:#ede9fe;
+  --blue:#2563eb;--blue-dim:#eff6ff;
+  --r:10px;--r-sm:6px;--r-lg:16px;
+  --sh:0 1px 2px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.1);
+  --sh-md:0 4px 6px -1px rgba(0,0,0,.07),0 2px 4px -1px rgba(0,0,0,.06);
+  --f:'Noto Sans Thai','Instrument Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--f);background:var(--surface);color:var(--ink);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input{font-family:var(--f)}
+
+/* ─── SVG Icon system ─── */
+.ico{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.ico svg{display:block}
+
+/* ─── Topbar ─── */
+.topbar{background:var(--paper);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:200;backdrop-filter:blur(12px)}
+.topbar-inner{max-width:1320px;margin:0 auto;padding:0 24px;height:56px;display:flex;align-items:center;gap:16px}
+.logo-wrap{display:flex;align-items:center;gap:10px}
+.logo-mark{width:32px;height:32px;background:var(--ink);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.logo-text{font-size:14px;font-weight:600;letter-spacing:-.02em;line-height:1.2}
+.logo-sub{font-size:11px;color:var(--ink3);font-weight:400;letter-spacing:.04em;text-transform:uppercase}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:500;letter-spacing:.01em}
+.pill-green{background:var(--ok-dim);color:var(--ok)}
+.pill-gray{background:var(--surface2);color:var(--ink2);font-size:11px}
+.dot-pulse{width:6px;height:6px;border-radius:99px;background:var(--ok);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ─── Shell ─── */
+.shell{max-width:1320px;margin:0 auto;padding:28px 24px 60px}
+
+/* ─── Page header ─── */
+.pg-head{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px}
+.pg-title{font-size:22px;font-weight:600;letter-spacing:-.02em}
+.pg-sub{font-size:13px;color:var(--ink2);margin-top:3px;display:flex;align-items:center;gap:6px}
+
+/* ─── Dept filter tabs ─── */
+.tabs{display:flex;gap:4px;flex-wrap:wrap;background:var(--surface2);padding:3px;border-radius:var(--r);width:fit-content;margin-bottom:20px}
+.tab{padding:6px 14px;border-radius:7px;font-size:13px;font-weight:500;color:var(--ink2);background:transparent;border:none;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.tab:hover{color:var(--ink);background:rgba(0,0,0,.04)}
+.tab.on{background:var(--paper);color:var(--ink);box-shadow:var(--sh);font-weight:600}
+
+/* ─── KPI row ─── */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px;margin-bottom:20px}
+.kpi{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;position:relative;overflow:hidden;transition:box-shadow .15s}
+.kpi:hover{box-shadow:var(--sh-md)}
+.kpi-stripe{position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:0 2px 2px 0}
+.kpi-icon-wrap{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.kpi-num{font-size:26px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.kpi-label{font-size:11.5px;color:var(--ink2);margin-top:5px;line-height:1.3}
+
+/* ─── Insight cards ─── */
+.insights{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-bottom:20px}
+.ic{border-radius:var(--r-lg);padding:14px 16px;border:1px solid}
+.ic-over{background:var(--over-dim);border-color:var(--over-mid)}
+.ic-warn{background:var(--warn-dim);border-color:var(--warn-mid)}
+.ic-miss{background:var(--miss-dim);border-color:#c4b5fd}
+.ic-ok{background:var(--ok-dim);border-color:var(--ok-mid)}
+.ic-head{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;margin-bottom:7px}
+.ic-body{font-size:12px;color:var(--ink2);line-height:1.5}
+.ic-names{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.iname{font-size:11px;font-weight:500;padding:2px 8px;border-radius:99px;background:rgba(0,0,0,.06)}
+
+/* ─── Dept grid ─── */
+.dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:20px}
+.dc{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;box-shadow:var(--sh);transition:box-shadow .15s}
+.dc:hover{box-shadow:var(--sh-md)}
+.dc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.dc-name{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.dc-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.dc-count{font-size:11px;font-weight:400;color:var(--ink3);padding:2px 8px;background:var(--surface2);border-radius:99px}
+.dc-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.dc-stat{text-align:center;padding:8px 4px;border-radius:var(--r-sm);background:var(--surface)}
+.dc-stat-n{font-size:17px;font-weight:700}
+.dc-stat-l{font-size:10px;color:var(--ink3);margin-top:1px;text-transform:uppercase;letter-spacing:.05em}
+.dc-avg{font-size:12px;color:var(--ink2);margin-top:10px;display:flex;justify-content:space-between}
+.dc-bar{height:4px;background:var(--surface2);border-radius:99px;margin-top:7px;overflow:hidden}
+.dc-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+
+/* ─── Section label ─── */
+.sec-row{display:flex;align-items:center;justify-content:space-between;margin:24px 0 12px}
+.sec-label{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.badge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:99px;background:var(--surface2);color:var(--ink2)}
+
+/* ─── Table ─── */
+.tbl-wrap{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh)}
+.tbl-toolbar{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.search-wrap{position:relative;flex:1;max-width:260px}
+.search-wrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--ink3);pointer-events:none}
+.search-wrap input{width:100%;padding:8px 10px 8px 32px;border:1px solid var(--line2);border-radius:var(--r-sm);font-size:13px;background:var(--surface);transition:border .15s,background .15s;outline:none}
+.search-wrap input:focus{border-color:var(--blue);background:var(--paper)}
+.sort-group{display:flex;gap:4px}
+.sort-btn{padding:7px 12px;border:1px solid var(--line2);border-radius:var(--r-sm);font-size:12px;font-weight:500;color:var(--ink2);background:var(--paper);cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s}
+.sort-btn:hover{border-color:var(--ink2);color:var(--ink)}
+.sort-btn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tbl-count{margin-left:auto;font-size:12px;color:var(--ink3)}
+
+table{width:100%;border-collapse:collapse}
+thead th{padding:9px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--ink3);letter-spacing:.07em;text-transform:uppercase;background:var(--surface);border-bottom:1px solid var(--line);white-space:nowrap}
+th.r,td.r{text-align:right}
+tbody tr{border-bottom:1px solid var(--line);cursor:pointer;transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover,tbody tr.open{background:#f8f8f9}
+td{padding:11px 14px;font-size:13px;vertical-align:middle}
+
+.pname{font-weight:500;font-size:13.5px;letter-spacing:-.01em}
+.pdept{font-size:11px;color:var(--ink3);margin-top:1px;display:flex;align-items:center;gap:4px}
+
+.lv{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;font-size:11.5px;font-weight:700}
+.lv8,.lv9{background:#fdf2f8;color:#9d174d}
+.lv7{background:#eff6ff;color:#1d4ed8}
+.lv6{background:#f0fdf4;color:#15803d}
+.lv5{background:#fffbeb;color:#92400e}
+.lv4,.lv3{background:#f5f3ff;color:#5b21b6}
+
+.hrs-cell{font-size:15px;font-weight:700;letter-spacing:-.02em}
+.hrs-bar{width:72px;height:3px;background:var(--line2);border-radius:99px;margin-top:4px;overflow:hidden}
+.hrs-fill{height:100%;border-radius:99px}
+
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;padding:3px 9px;border-radius:99px;line-height:1}
+.tag-ok{background:var(--ok-dim);color:var(--ok)}
+.tag-warn{background:var(--warn-dim);color:var(--warn)}
+.tag-over{background:var(--over-dim);color:var(--over)}
+.tag-miss{background:var(--miss-dim);color:var(--miss)}
+
+.act-chips{display:flex;flex-wrap:wrap;gap:3px}
+.act-chip{font-size:10.5px;padding:2px 7px;border-radius:99px;font-weight:500;opacity:.9}
+
+/* ─── Expanded row ─── */
+.exp-row td{padding:0}
+.exp-inner{padding:16px 20px 20px 58px;background:#f8f8f9;border-top:1px dashed var(--line)}
+.exp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.exp-box{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:13px 15px}
+.exp-box-title{font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px}
+.act-row{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--line)}
+.act-row:last-child{border:none}
+.act-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.act-name{font-size:12px;color:var(--ink2);flex:1}
+.act-h{font-size:12px;font-weight:600}
+.act-track{flex:1;height:3px;background:var(--surface2);border-radius:99px;overflow:hidden;max-width:80px}
+.act-fill{height:100%;border-radius:99px}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--line);font-size:12px}
+.stat-row:last-child{border:none}
+.stat-k{color:var(--ink2)}
+.stat-v{font-weight:600}
+
+/* ─── Expand chevron ─── */
+.chevron{transition:transform .2s;color:var(--ink3)}
+.open .chevron{transform:rotate(180deg)}
+
+/* ─── Footer ─── */
+.footer{text-align:center;padding:20px 0;font-size:12px;color:var(--ink3);border-top:1px solid var(--line);margin-top:32px}
+</style>
+</head>
+<body>
+
+<!-- ── Topbar ── -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="logo-wrap">
+      <div class="logo-mark">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-text">คลังลำพูน</div>
+        <div class="logo-sub">Workload Dashboard</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span class="pill pill-green">
+        <span class="dot-pulse"></span>
+        Live Data
+      </span>
+      <span class="pill pill-gray">พ.ค. 2569 · 36 คน</span>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- ── Page header + tabs ── -->
+  <div class="pg-head">
+    <div>
+      <h1 class="pg-title">ภาพรวมภาระงาน</h1>
+      <div class="pg-sub">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        มาตรฐาน 9 ชม./วัน · Productive Time 10 ชม./กะ (รวม OT 2 ชม.)
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs" id="deptTabs">
+    <button class="tab on" onclick="setDept('all',this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      ทั้งหมด
+    </button>
+    <button class="tab" onclick="setDept('Maintenance',this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      Maintenance
+    </button>
+    <button class="tab" onclick="setDept('Inbound',this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12H19M12 5l7 7-7 7"/></svg>
+      Inbound
+    </button>
+    <button class="tab" onclick="setDept('Outbound STO',this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      Outbound STO
+    </button>
+    <button class="tab" onclick="setDept('Outbound SO',this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h5l3 3v5h-8V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      Outbound SO
+    </button>
+    <button class="tab" onclick="setDept('ธุรการ',this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      ธุรการ
+    </button>
+    <button class="tab" onclick="setDept('Safety',this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Safety
+    </button>
+  </div>
+
+  <!-- ── KPI strip ── -->
+  <div class="kpi-row" id="kpiRow"></div>
+
+  <!-- ── Insights ── -->
+  <div class="insights" id="insights"></div>
+
+  <!-- ── Dept grid ── -->
+  <div class="sec-row">
+    <span class="sec-label">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      ภาพรวมรายหน่วยงาน
+    </span>
+  </div>
+  <div class="dg" id="deptGrid"></div>
+
+  <!-- ── Person table ── -->
+  <div class="sec-row">
+    <span class="sec-label">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      รายละเอียดรายบุคคล
+    </span>
+    <span class="badge" id="tCount">36 คน</span>
+  </div>
+
+  <div class="tbl-wrap">
+    <div class="tbl-toolbar">
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="q" placeholder="ค้นหาชื่อ ตำแหน่ง หน่วยงาน..." oninput="renderTable()">
+      </div>
+      <div class="sort-group">
+        <button class="sort-btn on" id="s-total" onclick="doSort('total')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          ชั่วโมง
+        </button>
+        <button class="sort-btn" id="s-lv" onclick="doSort('lv')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+          Level
+        </button>
+        <button class="sort-btn" id="s-name" onclick="doSort('name')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/></svg>
+          ชื่อ
+        </button>
+      </div>
+      <span class="tbl-count" id="tbl-count-label"></span>
+    </div>
+    <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:36px;padding-left:16px">#</th>
+          <th>พนักงาน</th>
+          <th class="r">LV</th>
+          <th class="r">ชม./วัน</th>
+          <th class="r">vs 9ชม.</th>
+          <th class="r">Util</th>
+          <th>สัดส่วนงาน</th>
+          <th>สถานะ</th>
+          <th style="width:32px"></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    </div>
+  </div>
+
+</div>
+<div class="footer">คลังสินค้าลำพูน · Workload Dashboard · ข้อมูล พฤษภาคม 2569</div>
+
+<script>
+/* ── Data ── */
+const D=[{"name":"\u0e19\u0e32\u0e22\u0e19\u0e23\u0e34\u0e19\u0e17\u0e23\u0e4c \u0e2b\u0e21\u0e2d\u0e1b\u0e48\u0e32","dept":"Maintenance","lv":7,"position":"\u0e1c\u0e39\u0e49\u0e0a\u0e48\u0e27\u0e22\u0e2b\u0e31\u0e27\u0e2b\u0e19\u0e49\u0e32\u0e2b\u0e19\u0e48\u0e27\u0e22\u0e07\u0e32\u0e19","total":9.49,"fixed":9.49,"volume":0.0,"event":0.0,"tasks":9,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":0.5,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":1.99,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":6.0,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":0,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":1.0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":0,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0},"status":"warn","util":118.6},{"name":"\u0e19\u0e32\u0e22\u0e20\u0e32\u0e04\u0e34\u0e13 \u0e22\u0e32\u0e21\u0e35","dept":"Maintenance","lv":5,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48","total":9.0,"fixed":9.0,"volume":0.0,"event":0.0,"tasks":3,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":0,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":0,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":0,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":0,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":9.0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":0,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0},"status":"ok","util":112.5},{"name":"\u0e19\u0e32\u0e22\u0e19\u0e34\u0e18\u0e34\u0e01\u0e23 \u0e04\u0e32\u0e23\u0e34\u0e19\u0e17\u0e32","dept":"Maintenance","lv":5,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48","total":9.0,"fixed":9.0,"volume":0.0,"event":0.0,"tasks":3,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":0,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":0,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":0,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":0,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":9.0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":0,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0},"status":"ok","util":112.5},{"name":"\u0e19\u0e32\u0e22\u0e2a\u0e38\u0e23\u0e28\u0e31\u0e01\u0e14\u0e34\u0e4c \u0e15\u0e4a\u0e30\u0e21\u0e32","dept":"Maintenance","lv":5,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48","total":12.0,"fixed":12.0,"volume":0.0,"event":0.0,"tasks":6,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":0,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":0,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":0,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":0,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":12.0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":0,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0},"status":"over","util":150.0},{"name":"\u0e19\u0e32\u0e22\u0e2d\u0e19\u0e38\u0e0a\u0e32 \u0e22\u0e32\u0e42\u0e19","dept":"Maintenance","lv":5,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48","total":9.0,"fixed":9.0,"volume":0.0,"event":0.0,"tasks":4,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":0,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":0,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":0,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":0,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":9.0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":0,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0},"status":"ok","util":112.5},{"name":"\u0e0a\u0e25\u0e23\u0e1a \u0e2b\u0e19\u0e39\u0e41\u0e01\u0e49\u0e27","dept":"Inbound","lv":8,"position":"\u0e2b\u0e31\u0e27\u0e2b\u0e19\u0e49\u0e32\u0e2b\u0e19\u0e48\u0e27\u0e22\u0e07\u0e32\u0e19\u0e23\u0e31\u0e1a\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32","total":8.14,"fixed":5.64,"volume":2.5,"event":0.0,"tasks":10,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":1.0,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":0.59,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":5.05,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":1.5,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":0,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0},"status":"ok","util":101.8},{"name":"\u0e1c\u0e14\u0e38\u0e07\u0e28\u0e31\u0e01\u0e14\u0e34\u0e4c \u0e21\u0e32\u0e25\u0e32","dept":"Inbound","lv":7,"position":"\u0e1c\u0e39\u0e49\u0e0a\u0e48\u0e27\u0e22\u0e2b\u0e31\u0e27\u0e2b\u0e19\u0e49\u0e32\u0e2b\u0e19\u0e48\u0e27\u0e22\u0e07\u0e32\u0e19\u0e23\u0e31\u0e1a\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32","total":8.5,"fixed":6.0,"volume":2.5,"event":0.0,"tasks":8,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":0.5,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":0,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":5.5,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":2.5,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":0,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0},"status":"ok","util":106.3},{"name":"\u0e2a\u0e21\u0e28\u0e31\u0e01\u0e14\u0e34\u0e4c \u0e1b\u0e34\u0e19\u0e31\u0e19","dept":"Inbound","lv":5,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48\u0e2d\u0e32\u0e27\u0e38\u0e42\u0e2a","total":8.27,"fixed":6.77,"volume":0.5,"event":0.0,"tasks":10,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":0,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":0.36,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":6.0,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":1.41,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":0,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0.5},"status":"ok","util":103.4},{"name":"\u0e19\u0e34\u0e27\u0e31\u0e12\u0e19\u0e4c \u0e01\u0e31\u0e19\u0e17\u0e30\u0e27\u0e07\u0e04\u0e4c","dept":"Inbound","lv":5,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48\u0e2d\u0e32\u0e27\u0e38\u0e42\u0e2a","total":8.0,"fixed":7.5,"volume":0.5,"event":0.0,"tasks":6,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":0,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":1.0,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":6.5,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":0.5,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":0,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0},"status":"ok","util":100.0},{"name":"\u0e19\u0e31\u0e19\u0e17\u0e27\u0e23\u0e23\u0e29 \u0e1e\u0e25\u0e2d\u0e22\u0e41\u0e2a\u0e19\u0e23\u0e31\u0e01","dept":"Inbound","lv":5,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48","total":8.0,"fixed":7.5,"volume":0.5,"event":0.0,"tasks":8,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":1.5,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":0.5,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":5.5,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":0.5,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":0,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0},"status":"ok","util":100.0},{"name":"Checker (LV4)","dept":"Inbound","lv":4,"position":"\u0e15\u0e23\u0e27\u0e08\u0e40\u0e0a\u0e47\u0e04\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32","total":7.5,"fixed":7.5,"volume":0.0,"event":0.0,"tasks":4,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":0,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":0,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":0,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":0,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":7.5,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0},"status":"ok","util":93.8},{"name":"Receiver \/ \u0e08\u0e31\u0e14\u0e40\u0e23\u0e35\u0e22\u0e07 (LV3)","dept":"Inbound","lv":3,"position":"\u0e08\u0e31\u0e14\u0e40\u0e23\u0e35\u0e22\u0e07\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32 \/ \u0e25\u0e32\u0e01\u0e2d\u0e2d\u0e01","total":7.5,"fixed":7.5,"volume":0.0,"event":0.0,"tasks":4,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":0,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":0,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":0,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":0,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":7.5,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0},"status":"ok","util":93.8},{"name":"\u0e2d\u0e20\u0e34\u0e0a\u0e32\u0e15\u0e34 \u0e22\u0e30\u0e0a\u0e31\u0e22","dept":"Inbound","lv":4,"position":"\u0e23\u0e31\u0e1a\u0e40\u0e02\u0e49\u0e32\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32 DC to DC","total":8.0,"fixed":8.0,"volume":0.0,"event":0.0,"tasks":2,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":0,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":0,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":0,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":0,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":8.0,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0},"status":"ok","util":100.0},{"name":"\u0e19\u0e34\u0e21\u0e34\u0e15 \u0e1c\u0e31\u0e14\u0e40\u0e08\u0e23\u0e34\u0e0d","dept":"Outbound STO","lv":8,"position":"\u0e2b\u0e31\u0e27\u0e2b\u0e19\u0e49\u0e32\u0e2b\u0e19\u0e48\u0e27\u0e22\u0e07\u0e32\u0e19\u0e04\u0e25\u0e31\u0e07\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32","total":8.14,"fixed":5.64,"volume":0.5,"event":0.0,"tasks":12,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":2.0,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":1.09,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":3.05,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":2.0,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":0,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0},"status":"ok","util":101.8},{"name":"\u0e18\u0e19\u0e40\u0e14\u0e0a \u0e40\u0e17\u0e1e\u0e28\u0e34\u0e23\u0e34","dept":"Outbound STO","lv":6,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48\u0e2d\u0e32\u0e27\u0e38\u0e42\u0e2a","total":9.45,"fixed":7.95,"volume":1.5,"event":0.0,"tasks":11,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":1.5,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":1.77,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":4.68,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":1.5,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":0,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0},"status":"warn","util":118.1},{"name":"\u0e1b\u0e23\u0e30\u0e17\u0e38\u0e21 \u0e28\u0e23\u0e35\u0e18\u0e07","dept":"Outbound STO","lv":6,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48\u0e2d\u0e32\u0e27\u0e38\u0e42\u0e2a","total":9.0,"fixed":7.0,"volume":2.0,"event":0.0,"tasks":6,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":1.0,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":1.0,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":5.0,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":2.0,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":0,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0},"status":"ok","util":112.5},{"name":"\u0e19\u0e23\u0e0a\u0e31\u0e22 \u0e0a\u0e31\u0e22\u0e0a\u0e19\u0e30","dept":"Outbound STO","lv":5,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48","total":9.0,"fixed":9.0,"volume":0.0,"event":0.0,"tasks":4,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":0,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":0,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":9.0,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":0,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":0,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0},"status":"ok","util":112.5},{"name":"\u0e08\u0e34\u0e23\u0e1e\u0e31\u0e19\u0e18\u0e4c \u0e04\u0e33\u0e21\u0e30\u0e22\u0e2d\u0e21","dept":"Outbound STO","lv":5,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48","total":9.0,"fixed":9.0,"volume":0.0,"event":0.0,"tasks":4,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":0,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":0,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":9.0,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":0,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":0,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0},"status":"ok","util":112.5},{"name":"\u0e27\u0e34\u0e17\u0e22\u0e32  \u0e1a\u0e38\u0e0d\u0e2a\u0e39\u0e07","dept":"Outbound STO","lv":5,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48","total":12.0,"fixed":12.0,"volume":0.0,"event":0.0,"tasks":4,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":0,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":0,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":12.0,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":0,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":0,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0},"status":"over","util":150.0},{"name":"\u0e40\u0e09\u0e25\u0e34\u0e21\u0e28\u0e31\u0e01\u0e14\u0e34\u0e4c \u0e14\u0e35\u0e15\u0e34\u0e1a","dept":"Outbound STO","lv":5,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48","total":8.0,"fixed":8.0,"volume":0.0,"event":0.0,"tasks":6,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":0,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":0,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":8.0,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":0,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":0,"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":0,"\u0e2d\u0e37\u0e48\u0e19\u0e46":0},"status":"ok","util":100.0},{"name":"Checker A","dept":"Outbound STO","lv":4,"position":"\u0e1e\u0e19\u0e31\u0e01\u0e07\u0e32\u0e19","total":0.5,"fixed":0.5,"volume":0.0,"event":0.0,"tasks":3,"acts":{"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":0.5},"status":"ok","util":6.3},{"name":"Checker A (กะB)","dept":"Outbound STO","lv":4,"position":"\u0e1e\u0e19\u0e31\u0e01\u0e07\u0e32\u0e19","total":9.0,"fixed":9.0,"volume":0.0,"event":0.0,"tasks":3,"acts":{"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":9.0},"status":"ok","util":112.5},{"name":"Pick in \/ Out","dept":"Outbound STO","lv":4,"position":"\u0e1e\u0e19\u0e31\u0e01\u0e07\u0e32\u0e19","total":0.0,"fixed":0.0,"volume":0.0,"event":0.0,"tasks":2,"acts":{},"status":"ok","util":0.0},{"name":"\u0e02\u0e08\u0e23\u0e28\u0e31\u0e01\u0e14\u0e34\u0e4c \u0e40\u0e27\u0e17\u0e28\u0e31\u0e01\u0e14\u0e34\u0e4c","dept":"Outbound SO","lv":8,"position":"\u0e2b\u0e31\u0e27\u0e2b\u0e19\u0e49\u0e32\u0e2b\u0e19\u0e48\u0e27\u0e22\u0e07\u0e32\u0e19","total":9.33,"fixed":7.83,"volume":1.5,"event":0.0,"tasks":15,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":2.3,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":0.5,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":4.98,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":2.0},"status":"warn","util":116.6},{"name":"\u0e14\u0e19\u0e38\u0e1e\u0e25  \u0e17\u0e2d\u0e07\u0e1a\u0e23\u0e34\u0e2a\u0e38\u0e17\u0e18\u0e34\u0e4c","dept":"Outbound SO","lv":6,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48\u0e2d\u0e32\u0e27\u0e38\u0e42\u0e2a","total":8.09,"fixed":6.09,"volume":2.0,"event":0.0,"tasks":13,"acts":{"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":0.58,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":6.51,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":1.0},"status":"ok","util":101.1},{"name":"\u0e08\u0e31\u0e19\u0e17\u0e23\u0e4c\u0e17\u0e32 \u0e1e\u0e23\u0e21\u0e21\u0e32\u0e25\u0e32","dept":"Outbound SO","lv":5,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48","total":8.59,"fixed":7.09,"volume":1.5,"event":0.0,"tasks":8,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":0.5,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":1.59,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":5.0,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":1.5},"status":"ok","util":107.4},{"name":"\u0e13\u0e31\u0e0e\u0e10\u0e34\u0e22\u0e32\u0e1e\u0e23 \u0e0a\u0e30\u0e19\u0e30\u0e14\u0e31\u0e07","dept":"Outbound SO","lv":5,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48","total":8.04,"fixed":7.04,"volume":1.0,"event":0.0,"tasks":7,"acts":{"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":0.54,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":5.5,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":2.0},"status":"ok","util":100.5},{"name":"\u0e01\u0e32\u0e0d\u0e08\u0e23\u0e31\u0e15\u0e19\u0e4c \u0e1e\u0e23\u0e2b\u0e21\u0e08\u0e31\u0e01\u0e29\u0e4c","dept":"Outbound SO","lv":5,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48","total":8.73,"fixed":7.23,"volume":1.5,"event":0.0,"tasks":8,"acts":{"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":2.73,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":5.0,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":1.0},"status":"ok","util":109.1},{"name":"\u0e27\u0e23\u0e23\u0e13\u0e32\u0e23\u0e31\u0e15\u0e19\u0e4c \u0e08\u0e31\u0e19\u0e17\u0e23\u0e4c\u0e15\u0e32\u0e43\u0e2b\u0e21\u0e48","dept":"Outbound SO","lv":5,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48","total":8.45,"fixed":7.45,"volume":1.0,"event":0.0,"tasks":9,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":0.5,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":2.45,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":4.5,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":1.0},"status":"ok","util":105.6},{"name":"\u0e19\u0e38\u0e0a\u0e08\u0e23\u0e32 \u0e40\u0e27\u0e17\u0e28\u0e31\u0e01\u0e14\u0e34\u0e4c","dept":"Outbound SO","lv":5,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48","total":8.0,"fixed":8.0,"volume":0.0,"event":0.0,"tasks":4,"acts":{"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":8.0},"status":"ok","util":100.0},{"name":"\u0e2d\u0e34\u0e19\u0e17\u0e23\u0e4c\u0e08\u0e31\u0e19\u0e17\u0e23\u0e4c \u0e19\u0e34\u0e21\u0e34\u0e15\u0e23\u0e28\u0e34\u0e25\u0e1b\u0e4c","dept":"Outbound SO","lv":5,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48","total":8.0,"fixed":7.5,"volume":1.0,"event":0.0,"tasks":6,"acts":{"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":1.5,"\u0e04\u0e27\u0e1a\u0e04\u0e38\u0e21\u0e07\u0e32\u0e19 \/ \u0e2b\u0e19\u0e49\u0e32\u0e07\u0e32\u0e19":6.0,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":1.0},"status":"ok","util":100.0},{"name":"\u0e23\u0e31\u0e15\u0e19\u0e32 \u0e2d\u0e34\u0e19\u0e17\u0e23\u0e4c\u0e28\u0e23\u0e35","dept":"Outbound SO","lv":5,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48","total":1.82,"fixed":1.82,"volume":0.0,"event":0.0,"tasks":3,"acts":{"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":1.82},"status":"ok","util":22.8},{"name":"\u0e13\u0e31\u0e10\u0e27\u0e38\u0e12\u0e34 \u0e01\u0e31\u0e19\u0e18\u0e34\u0e42\u0e19","dept":"Outbound SO","lv":4,"position":"\u0e1e\u0e19\u0e31\u0e01\u0e07\u0e32\u0e19","total":8.0,"fixed":8.0,"volume":0.0,"event":0.0,"tasks":7,"acts":{"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":8.0},"status":"ok","util":100.0},{"name":"CHECKER \/ PICKER","dept":"Outbound SO","lv":4,"position":"\u0e1e\u0e19\u0e31\u0e01\u0e07\u0e32\u0e19","total":0.5,"fixed":0.5,"volume":0.0,"event":0.0,"tasks":3,"acts":{"\u0e1b\u0e0f\u0e34\u0e1a\u0e31\u0e15\u0e34\u0e01\u0e32\u0e23 \/ Picking \/ Receive":0.5},"status":"ok","util":6.3},{"name":"\u0e25\u0e34\u0e1b\u0e14\u0e32  \u0e0a\u0e31\u0e22\u0e1e\u0e24\u0e01\u0e29\u0e4c","dept":"\u0e18\u0e38\u0e23\u0e01\u0e32\u0e23","lv":6,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48\u0e2d\u0e32\u0e27\u0e38\u0e42\u0e2a","total":9.06,"fixed":8.06,"volume":1.0,"event":0.0,"tasks":23,"acts":{"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":7.06,"\u0e1b\u0e23\u0e30\u0e2a\u0e32\u0e19\u0e07\u0e32\u0e19 \/ \u0e41\u0e01\u0e49\u0e1b\u0e31\u0e0d\u0e2b\u0e32":2.0},"status":"warn","util":113.3},{"name":"\u0e08\u0e31\u0e01\u0e23\u0e1e\u0e31\u0e19\u0e18\u0e4c \u0e08\u0e31\u0e19\u0e17\u0e23\u0e4c\u0e1a\u0e39\u0e23\u0e13\u0e4c","dept":"Safety","lv":5,"position":"\u0e40\u0e08\u0e49\u0e32\u0e2b\u0e19\u0e49\u0e32\u0e17\u0e35\u0e48","total":6.42,"fixed":4.92,"volume":0.5,"event":1.0,"tasks":20,"acts":{"\u0e1b\u0e23\u0e30\u0e0a\u0e38\u0e21 \/ \u0e1e\u0e39\u0e14\u0e04\u0e38\u0e22":0.33,"\u0e17\u0e33\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19 \/ \u0e04\u0e35\u0e22\u0e4c\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25":1.42,"\u0e15\u0e23\u0e27\u0e08 \/ \u0e0b\u0e48\u0e2d\u0e21\u0e1a\u0e33\u0e23\u0e38\u0e07":3.67,"\u0e2d\u0e37\u0e48\u0e19\u0e46":1.0},"status":"ok","util":80.3}];
+
+/* ── Palette ── */
+const AC={
+  'ประชุม / พูดคุย':'#3b82f6',
+  'ทำรายงาน / คีย์ข้อมูล':'#10b981',
+  'ควบคุมงาน / หน้างาน':'#8b5cf6',
+  'ประสานงาน / แก้ปัญหา':'#f59e0b',
+  'ตรวจ / ซ่อมบำรุง':'#ef4444',
+  'ปฏิบัติการ / Picking / Receive':'#06b6d4',
+  'อื่นๆ':'#94a3b8'
+};
+const AC_S={
+  'ประชุม / พูดคุย':'#dbeafe',
+  'ทำรายงาน / คีย์ข้อมูล':'#d1fae5',
+  'ควบคุมงาน / หน้างาน':'#ede9fe',
+  'ประสานงาน / แก้ปัญหา':'#fef3c7',
+  'ตรวจ / ซ่อมบำรุง':'#fee2e2',
+  'ปฏิบัติการ / Picking / Receive':'#cffafe',
+  'อื่นๆ':'#f1f5f9'
+};
+const DC={'Maintenance':'#8b5cf6','Inbound':'#3b82f6','Outbound STO':'#10b981','Outbound SO':'#f59e0b','ธุรการ':'#ef4444','Safety':'#06b6d4'};
+const DC_BG={'Maintenance':'#f5f3ff','Inbound':'#eff6ff','Outbound STO':'#f0fdf4','Outbound SO':'#fffbeb','ธุรการ':'#fef2f2','Safety':'#ecfeff'};
+
+/* ── State ── */
+let dept='all', sortK='total', sortD=-1, exp=null;
+
+const chev=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`;
+
+function filtered(){
+  const q=(document.getElementById('q')?.value||'').toLowerCase();
+  return D.filter(p=>(dept==='all'||p.dept===dept)&&
+    (!q||(p.name.toLowerCase().includes(q)||p.dept.toLowerCase().includes(q)||p.position.toLowerCase().includes(q))))
+    .sort((a,b)=>typeof a[sortK]==='string'?sortD*a[sortK].localeCompare(b[sortK],'th'):sortD*(a[sortK]-b[sortK]));
+}
+
+function setDept(d,el){
+  dept=d; exp=null;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  render();
+}
+
+function doSort(k){
+  if(sortK===k)sortD*=-1; else{sortK=k;sortD=-1;}
+  ['total','lv','name'].forEach(x=>{
+    const b=document.getElementById('s-'+x);
+    if(b) b.classList.toggle('on',x===k);
+  });
+  renderTable();
+}
+
+function render(){ renderKPI(); renderInsights(); renderDepts(); renderTable(); }
+
+function renderKPI(){
+  const d=filtered();
+  const ok=d.filter(p=>p.status==='ok').length;
+  const warn=d.filter(p=>p.status==='warn').length;
+  const over=d.filter(p=>p.status==='over').length;
+  const miss=d.filter(p=>p.total<2&&p.tasks>0).length;
+  const avg=d.length?(d.reduce((s,p)=>s+p.total,0)/d.length).toFixed(1):0;
+
+  const kpis=[
+    {k:'total',n:d.length,l:'พนักงานทั้งหมด',
+     icon:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+     color:'#3b82f6',ibg:'#eff6ff',stripe:'#3b82f6'},
+    {k:'ok',n:ok,l:'ปกติ ≤ 9 ชม.',
+     icon:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+     color:'#16a34a',ibg:'#dcfce7',stripe:'#16a34a'},
+    {k:'warn',n:warn,l:'เกินเล็กน้อย 9–10.5',
+     icon:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+     color:'#d97706',ibg:'#fef9c3',stripe:'#d97706'},
+    {k:'over',n:over,l:'เกินมาตรฐาน > 10.5',
+     icon:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+     color:'#dc2626',ibg:'#fee2e2',stripe:'#dc2626'},
+    {k:'miss',n:miss,l:'ข้อมูลไม่สมบูรณ์',
+     icon:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+     color:'#7c3aed',ibg:'#ede9fe',stripe:'#7c3aed'},
+    {k:'avg',n:avg,l:'ชม./วัน เฉลี่ย',
+     icon:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+     color:'#0891b2',ibg:'#ecfeff',stripe:'#0891b2'},
+  ];
+  document.getElementById('kpiRow').innerHTML=kpis.map(k=>`
+    <div class="kpi">
+      <div class="kpi-stripe" style="background:${k.stripe}"></div>
+      <div class="kpi-icon-wrap" style="background:${k.ibg};color:${k.color}">${k.icon}</div>
+      <div class="kpi-num" style="color:${k.color}">${k.n}</div>
+      <div class="kpi-label">${k.l}</div>
+    </div>`).join('');
+}
+
+function renderInsights(){
+  const d=filtered();
+  const over=d.filter(p=>p.status==='over');
+  const warn=d.filter(p=>p.status==='warn');
+  const miss=d.filter(p=>p.total<2&&p.tasks>0);
+  const ok=d.filter(p=>p.status==='ok'&&p.total>=7);
+  let h='';
+  if(over.length) h+=`<div class="ic ic-over"><div class="ic-head"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> เกินมาตรฐาน — ต้องตรวจสอบ scope งาน</div><div class="ic-body">ภาระงานเกิน 10.5 ชม./วัน ต้องทบทวนทันที</div><div class="ic-names">${over.map(p=>`<span class="iname">${p.name.split(' ')[0]}</span>`).join('')}</div></div>`;
+  if(warn.length) h+=`<div class="ic ic-warn"><div class="ic-head"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> เกินเล็กน้อย — พิจารณา delegate</div><div class="ic-body">ภาระ 9–10.5 ชม./วัน พิจารณาแบ่งงานให้ระดับล่าง</div><div class="ic-names">${warn.map(p=>`<span class="iname">${p.name.split(' ')[0]}</span>`).join('')}</div></div>`;
+  if(miss.length) h+=`<div class="ic ic-miss"><div class="ic-head"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> ข้อมูลยังไม่สมบูรณ์ — กรอกเพิ่ม</div><div class="ic-body">มีงานที่ไม่มีชั่วโมง ทำให้คำนวณภาระไม่ได้</div><div class="ic-names">${miss.map(p=>`<span class="iname">${p.name.split(' ')[0]}</span>`).join('')}</div></div>`;
+  if(!h&&ok.length) h=`<div class="ic ic-ok"><div class="ic-head"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> ภาระงานสมดุล — ทุกคนในช่วงปกติ</div><div class="ic-body">${ok.length} คน มีภาระงานอยู่ในช่วง 7–9 ชม./วัน</div></div>`;
+  document.getElementById('insights').innerHTML=h;
+}
+
+function renderDepts(){
+  const byD={};
+  filtered().forEach(p=>{
+    if(!byD[p.dept]) byD[p.dept]={p:[],ok:0,warn:0,over:0};
+    byD[p.dept].p.push(p); byD[p.dept][p.status]++;
+  });
+  document.getElementById('deptGrid').innerHTML=Object.entries(byD).map(([d,v])=>{
+    const avg=(v.p.reduce((s,p)=>s+p.total,0)/v.p.length).toFixed(1);
+    const pct=Math.min(parseFloat(avg)/12*100,100);
+    const fc=v.over>0?'#dc2626':v.warn>0?'#d97706':'#16a34a';
+    const ic=DC[d]||'#64748b'; const ibg=DC_BG[d]||'#f8fafc';
+    return `<div class="dc">
+      <div class="dc-head">
+        <div class="dc-name">
+          <div class="dc-icon" style="background:${ibg};color:${ic}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          </div>
+          <span>${d}</span>
+        </div>
+        <span class="dc-count">${v.p.length} คน</span>
+      </div>
+      <div class="dc-stat-row">
+        <div class="dc-stat"><div class="dc-stat-n" style="color:#16a34a">${v.ok}</div><div class="dc-stat-l">ปกติ</div></div>
+        <div class="dc-stat"><div class="dc-stat-n" style="color:#d97706">${v.warn}</div><div class="dc-stat-l">เกินนิด</div></div>
+        <div class="dc-stat"><div class="dc-stat-n" style="color:#dc2626">${v.over}</div><div class="dc-stat-l">เกินมาก</div></div>
+      </div>
+      <div class="dc-avg"><span>เฉลี่ย <strong>${avg}</strong> ชม./วัน</span><span style="color:var(--ink3)">${Math.round(pct)}% ของ 12ชม.</span></div>
+      <div class="dc-bar"><div class="dc-fill" style="width:${pct}%;background:${fc}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderTable(){
+  const d=filtered();
+  document.getElementById('tCount').textContent=`${d.length} คน`;
+  document.getElementById('tbl-count-label').textContent=`แสดง ${d.length} รายการ`;
+  let html='';
+  d.forEach((p,i)=>{
+    const key=p.name+'|'+p.dept;
+    const isExp=exp===key;
+    const sc=p.status==='over'?'#dc2626':p.status==='warn'?'#d97706':'#16a34a';
+    const vs9=p.total>9?`+${(p.total-9).toFixed(1)}`:null;
+    const bp=Math.min(p.util/150*100,100);
+    const bf=p.status==='over'?'#dc2626':p.status==='warn'?'#d97706':'#16a34a';
+    const topActs=Object.entries(p.acts).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    html+=`<tr class="${isExp?'open':''}" onclick="toggle('${key.replace(/'/g,"\\'")}')">
+      <td style="color:var(--ink3);font-size:11px;padding-left:16px">${i+1}</td>
+      <td><div class="pname">${p.name}</div><div class="pdept"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>${p.dept} · ${p.position}</div></td>
+      <td class="r"><span class="lv lv${p.lv}">L${p.lv}</span></td>
+      <td class="r"><div class="hrs-cell" style="color:${sc}">${p.total}</div><div class="hrs-bar"><div class="hrs-fill" style="width:${bp}%;background:${bf}"></div></div></td>
+      <td class="r" style="font-size:12px;font-weight:600;color:${vs9?'#d97706':'#16a34a'}">${vs9||'—'}</td>
+      <td class="r" style="font-size:12px;font-weight:700;color:${p.util>120?'#dc2626':p.util>100?'#d97706':'#16a34a'}">${Math.round(p.util)}%</td>
+      <td><div class="act-chips">${topActs.map(([k,v])=>`<span class="act-chip" style="background:${AC_S[k]||'#f1f5f9'};color:${AC[k]||'#64748b'}">${k.split('/')[0].trim()} ${v.toFixed(1)}h</span>`).join('')}</div></td>
+      <td><span class="tag tag-${p.status}">${p.status==='ok'?'ปกติ':p.status==='warn'?'เกินนิดหน่อย':'เกินมาตรฐาน'}</span></td>
+      <td><span class="chevron ${isExp?'open':''}">${chev}</span></td>
+    </tr>`;
+    if(isExp){
+      const actRows=Object.entries(p.acts).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+      html+=`<tr class="exp-row"><td colspan="9"><div class="exp-inner"><div class="exp-grid">
+        <div class="exp-box"><div class="exp-box-title">สัดส่วนกิจกรรม</div>${actRows.map(([k,v])=>{
+          const pct2=p.total>0?Math.min(v/p.total*100,100):0;
+          return `<div class="act-row"><div class="act-dot" style="background:${AC[k]||'#94a3b8'}"></div><div class="act-name">${k}</div><div class="act-track"><div class="act-fill" style="width:${pct2}%;background:${AC[k]||'#94a3b8'}"></div></div><div class="act-h">${v.toFixed(2)}h</div></div>`;
+        }).join('')}</div>
+        <div class="exp-box"><div class="exp-box-title">สรุปภาระงาน</div>
+          <div class="stat-row"><span class="stat-k">🔵 FIXED</span><span class="stat-v">${p.fixed} ชม./วัน</span></div>
+          <div class="stat-row"><span class="stat-k">🟡 VOLUME</span><span class="stat-v">${p.volume} ชม./วัน</span></div>
+          <div class="stat-row"><span class="stat-k">🔴 EVENT (avg)</span><span class="stat-v">${p.event} ชม./วัน</span></div>
+          <div class="stat-row" style="border-top:1px solid var(--line2);margin-top:4px;padding-top:8px"><span class="stat-k" style="font-weight:600">รวม</span><span class="stat-v" style="font-size:16px;color:${sc}">${p.total} ชม./วัน</span></div>
+          <div class="stat-row"><span class="stat-k">Utilization</span><span class="stat-v" style="color:${p.util>120?'#dc2626':p.util>100?'#d97706':'#16a34a'}">${Math.round(p.util)}%</span></div>
+          <div class="stat-row"><span class="stat-k">จำนวน task</span><span class="stat-v">${p.tasks} รายการ</span></div>
+        </div>
+      </div></div></td></tr>`;
+    }
+  });
+  document.getElementById('tbody').innerHTML=html;
+}
+
+function toggle(key){
+  exp=exp===key?null:key;
+  renderTable();
+}
+window.setDept=setDept;window.doSort=doSort;window.toggle=toggle;
+render();
+</script>
+</body>
+</html>
